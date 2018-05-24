@@ -6,11 +6,11 @@
 
 // Buffer index values shared between shader and C code to ensure Metal shader buffer inputs match
 //   Metal API buffer set calls
-typedef enum AAPLVertexInputIndex
+typedef enum BufferArgumentIndex
 {
-    AAPLVertexInputIndexVertices     = 0,
-    AAPLVertexInputIndexViewportSize = 1,
-} AAPLVertexInputIndex;
+    BufferArgumentIndexVertices     = 0,
+    BufferArgumentIndexViewportSize = 1,
+} BufferArgumentIndex;
 
 
 //  This structure defines the layout of each vertex in the array of vertices set as an input to our
@@ -25,6 +25,6 @@ typedef struct
 
     // Floating-point RGBA colors
     vector_float4 color;
-} AAPLVertex;
+} Vertex;
 
 #endif /* AAPLShaderTypes_h */

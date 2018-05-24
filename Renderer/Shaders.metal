@@ -24,8 +24,8 @@ typedef struct
 // Vertex function
 vertex RasterizerData
 vertexShader(uint vertexID [[vertex_id]],
-             constant AAPLVertex *vertices [[buffer(AAPLVertexInputIndexVertices)]],
-             constant vector_uint2 *viewportSizePointer [[buffer(AAPLVertexInputIndexViewportSize)]])
+             constant Vertex *vertices [[buffer(BufferArgumentIndexVertices)]],
+             constant vector_uint2 *viewportSizePointer [[buffer(BufferArgumentIndexViewportSize)]])
 {
     RasterizerData out;
 

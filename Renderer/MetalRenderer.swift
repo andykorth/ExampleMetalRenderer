@@ -12,13 +12,6 @@ import MetalKit
 // this seems naughty, but it is quite convenient
 extension String: Error {}
 
-struct Vertex {
-	// Positions in pixel space
-	// (e.g. a value of 100 indicates 100 pixels from the center)
-	var Position : vector_float3
-	var Color : vector_float4
-}
-
 class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	// The device (aka GPU) we're using to render
@@ -26,6 +19,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var pipelineState : MTLRenderPipelineState
 	var commandQueue : MTLCommandQueue
 	var viewportSize : vector_uint2
+	var mesh : MDLMesh
 	
 	init(view : MTKView) throws {
 		// perform some initialization here
@@ -59,16 +53,34 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		// Create the command queue
 		commandQueue = device.makeCommandQueue()
 		
+		// Load the .OBJ file
+		guard let url = Bundle.main.url(forResource: "capsule", withExtension: "obj") else {
+			fatalError("Failed to find model file.")
+		}
+		
+		let asset = MDLAsset.init(url: url)
+		guard let mesh = asset.object(at: 0) as? MDLMesh else {
+			fatalError("Failed to get mesh from asset.")
+		}
+		print("Vertex count: \(mesh.vertexCount)")
+		self.mesh = mesh
+		
 		super.init()
 	}
 	
 	func draw(in view: MTKView) {
-		let vertices = [
-			Vertex(Position: float3(100, -100, 0) , Color: float4(1, 0, 0, 1)),
-			Vertex(Position: float3(100, 100, 0)  , Color: float4(0, 1, 0, 1)),
-			Vertex(Position: float3(-100, 100, 0) , Color: float4(0, 0, 1, 1)),
-			Vertex(Position: float3(-100, -100, 0), Color: float4(0, 0, 0, 1))
-		]
+		
+		let meshes = try MTKMesh.newMeshes(from: asset, device: device!, sourceMeshes: nil)
+		
+		
+		let vertices : [Vertex] = []
+		
+//		let vertices = [
+//			Vertex(position: float3(100, -100, 0) , color: float4(1, 0, 0, 1)),
+//			Vertex(position: float3(100, 100, 0)  , color: float4(0, 1, 0, 1)),
+//			Vertex(position: float3(-100, 100, 0) , color: float4(0, 0, 1, 1)),
+//			Vertex(position: float3(-100, -100, 0), color: float4(0, 0, 0, 1))
+//		]
 		
 		// Create a new command buffer for each render pass to the current drawable
 		let buffer = commandQueue.makeCommandBuffer()
@@ -96,18 +108,18 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			//      of the argument in our 'vertexShader' function
 			
 			// You send a pointer to the `triangleVertices` array also and indicate its size
-			// The `AAPLVertexInputIndexVertices` enum value corresponds to the `vertexArray`
+			// The `BufferArgumentIndexVertices` enum value corresponds to the `vertexArray`
 			// argument in the `vertexShader` function because its buffer attribute also uses
-			// the `AAPLVertexInputIndexVertices` enum value for its index
+			// the `BufferArgumentIndexVertices` enum value for its index
 			let pos = MemoryLayout<Vertex>.stride * vertices.count;
-			renderEncoder.setVertexBytes(vertices, length: pos, at: Int(AAPLVertexInputIndexVertices.rawValue) )
+			renderEncoder.setVertexBytes(vertices, length: pos, at: Int(BufferArgumentIndexVertices.rawValue) )
 			
 			// You send a pointer to `_viewportSize` and also indicate its size
-			// The `AAPLVertexInputIndexViewportSize` enum value corresponds to the
+			// The `BufferArgumentIndexViewportSize` enum value corresponds to the
 			// `viewportSizePointer` argument in the `vertexShader` function because its
-			//  buffer attribute also uses the `AAPLVertexInputIndexViewportSize` enum value
+			//  buffer attribute also uses the `BufferArgumentIndexViewportSize` enum value
 			//  for its index
-			renderEncoder.setVertexBytes(&viewportSize, length: MemoryLayout<vector_uint2>.stride, at: Int(AAPLVertexInputIndexViewportSize.rawValue))
+			renderEncoder.setVertexBytes(&viewportSize, length: MemoryLayout<vector_uint2>.stride, at: Int(BufferArgumentIndexViewportSize.rawValue))
 			
 			renderEncoder.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: vertices.count)
 			renderEncoder.endEncoding()
