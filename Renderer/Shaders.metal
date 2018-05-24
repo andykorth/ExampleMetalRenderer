@@ -62,6 +62,6 @@ vertexShader(uint vertexID [[vertex_id]],
 fragment float4 fragmentShader(RasterizerData in [[stage_in]])
 {
     // We return the color we just set which will be written to our color attachment.
-    return in.clipSpacePosition.x / 1000;
+    return in.color;
 }
 

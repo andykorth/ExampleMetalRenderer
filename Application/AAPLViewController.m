@@ -6,7 +6,7 @@ Implementation of our cross-platform view controller
 */
 
 #import "AAPLViewController.h"
-#import "MetalRenderer.h"
+#import "MetalEngine-Swift.h"
 
 @implementation AAPLViewController
 {
@@ -29,7 +29,7 @@ Implementation of our cross-platform view controller
         return;
     }
 
-    _renderer = [[MetalRenderer alloc] initWithMetalKitView:_view];
+    _renderer = [[MetalRenderer alloc ] initWithView:_view error:nil];
 
     if(!_renderer)
     {

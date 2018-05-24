@@ -21,7 +21,7 @@ typedef struct
 {
     // Positions in pixel space
     // (e.g. a value of 100 indicates 100 pixels from the center)
-    vector_float2 position;
+    vector_float3 position;
 
     // Floating-point RGBA colors
     vector_float4 color;

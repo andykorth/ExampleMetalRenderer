@@ -15,8 +15,6 @@ Header for our our cross-platform view controller
 
 @import MetalKit;
 
-#import "MetalRenderer.h"
-
 // Our view controller
 @interface AAPLViewController : PlatformViewController
 
