@@ -7,6 +7,27 @@ using namespace metal;
 // Include header shared between this Metal shader code and C code executing Metal API commands
 #import "ShaderTypes.h"
 
+// define some types only in here, can't share them :(
+
+struct VertexIn {
+	float4 position [[attribute(0)]];
+	float4 color [[attribute(1)]];
+	float2 texCoords [[attribute(2)]];
+	float occlusion [[attribute(3)]];
+};
+
+struct VertexOut {
+	float4 position [[position]];
+	float4 color;
+	float2 texCoords;
+	float occlusion;
+};
+
+struct Uniforms {
+	float4x4 modelViewProjectionMatrix;
+};
+
+
 // Vertex shader outputs and fragment shader inputs
 typedef struct
 {
@@ -21,47 +42,30 @@ typedef struct
 
 } RasterizerData;
 
-// Vertex function
-vertex RasterizerData
-vertexShader(uint vertexID [[vertex_id]],
-             constant Vertex *vertices [[buffer(BufferArgumentIndexVertices)]],
-             constant vector_uint2 *viewportSizePointer [[buffer(BufferArgumentIndexViewportSize)]])
+vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
+							 constant Uniforms &uniforms [[buffer(1)]],
+							 uint vertexId [[vertex_id]])
 {
-    RasterizerData out;
-
-    // Initialize our output clip space position
-    out.clipSpacePosition = vector_float4(0.0, 0.0, 0.0, 1.0);
-
-    // Index into our array of positions to get the current vertex
-    //   Our positions are specified in pixel dimensions (i.e. a value of 100 is 100 pixels from
-    //   the origin)
-    float2 pixelSpacePosition = vertices[vertexID].position.xy;
-
-    // Dereference viewportSizePointer and cast to float so we can do floating-point division
-    vector_float2 viewportSize = vector_float2(*viewportSizePointer);
-
-    // The output position of every vertex shader is in clip-space (also known as normalized device
-    //   coordinate space, or NDC).   A value of (-1.0, -1.0) in clip-space represents the
-    //   lower-left corner of the viewport whereas (1.0, 1.0) represents the upper-right corner of
-    //   the viewport.
-
-    // Calculate and write x and y values to our clip-space position.  In order to convert from
-    //   positions in pixel space to positions in clip-space, we divide the pixel coordinates by
-    //   half the size of the viewport.
-    out.clipSpacePosition.xy = pixelSpacePosition / (viewportSize / 2.0);
-
-    // Pass our input color straight to our output color.  This value will be interpolated
-    //   with the other color values of the vertices that make up the triangle to produce
-    //   the color value for each fragment in our fragment shader
-    out.color = vertices[vertexID].color;
-
-    return out;
+	float4x4 mvpMatrix = uniforms.modelViewProjectionMatrix;
+	float4 position = vertices.position;
+	
+	VertexOut out;
+	out.position = mvpMatrix * position;
+	out.color = float4(1);
+	out.texCoords = vertices.texCoords;
+	out.occlusion = vertices.occlusion;
+	
+	return out;
 }
 
-// Fragment function
-fragment float4 fragmentShader(RasterizerData in [[stage_in]])
+fragment half4 fragmentShader(VertexOut fragments [[stage_in]],
+							 texture2d<float> textures [[texture(0)]])
 {
-    // We return the color we just set which will be written to our color attachment.
-    return in.color;
+	float4 baseColor = fragments.color;
+	float4 occlusion = fragments.occlusion;
+	constexpr sampler samplers;
+	float4 texture = textures.sample(samplers, fragments.texCoords);
+	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
+	//return half4(baseColor.r, baseColor.g, baseColor.b, 1);
+//	return half4(baseColor * occlusion * texture);
 }
-

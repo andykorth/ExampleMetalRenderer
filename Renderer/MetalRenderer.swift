@@ -19,13 +19,29 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var pipelineState : MTLRenderPipelineState
 	var commandQueue : MTLCommandQueue
 	var viewportSize : vector_uint2
-	var mesh : MDLMesh
+	var mesh : MTKMesh
+	var view : MTKView
+	
+	// better place to put this?
+	let depthStencilState : MTLDepthStencilState
+	
 	
 	init(view : MTKView) throws {
 		// perform some initialization here
 		device = view.device!
 		viewportSize = vector_uint2(0, 0)
 		
+		view.clearColor = MTLClearColorMake(0.5, 0.5, 1, 1)
+		view.colorPixelFormat = .bgra8Unorm
+		view.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
+		self.view = view;
+		
+		let descriptor = MTLDepthStencilDescriptor()
+		descriptor.depthCompareFunction = MTLCompareFunction.less
+		descriptor.isDepthWriteEnabled = true
+		
+		depthStencilState = device.makeDepthStencilState(descriptor: descriptor)
+
 		// Load all the shader files with a .metal file extension in the project
 		let default📚 = device.newDefaultLibrary()!
 		
@@ -33,11 +49,28 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let vertexFunction = default📚.makeFunction(name: "vertexShader")
 		let fragmentFunction = default📚.makeFunction(name: "fragmentShader")
 		
+		// sometimes you need a vertex descriptor:
+		// --- "Vertex function has input attributes but no vertex descriptor was set"
+		let vertexDescriptor = MTLVertexDescriptor()
+		vertexDescriptor.attributes[0].offset = 0
+		vertexDescriptor.attributes[0].format = MTLVertexFormat.float3 // position
+		vertexDescriptor.attributes[1].offset = 12
+		vertexDescriptor.attributes[1].format = MTLVertexFormat.uchar4 // color
+		vertexDescriptor.attributes[2].offset = 16
+		vertexDescriptor.attributes[2].format = MTLVertexFormat.half2 // texture
+		vertexDescriptor.attributes[3].offset = 20
+		vertexDescriptor.attributes[3].format = MTLVertexFormat.float // occlusion
+		vertexDescriptor.layouts[0].stride = 24
+		
 		// Configure a pipeline descriptor that is used to create a pipeline state
 		let pipelineDesc : MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor.init()
-		pipelineDesc.vertexFunction = vertexFunction;
-		pipelineDesc.fragmentFunction = fragmentFunction;
-		pipelineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat;
+		pipelineDesc.vertexDescriptor = vertexDescriptor
+		pipelineDesc.vertexFunction = vertexFunction
+		pipelineDesc.fragmentFunction = fragmentFunction
+		pipelineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
+		
+		pipelineDesc.depthAttachmentPixelFormat = view.depthStencilPixelFormat
+		pipelineDesc.stencilAttachmentPixelFormat = view.depthStencilPixelFormat
 
 		do{
 			try pipelineState = device.makeRenderPipelineState(descriptor: pipelineDesc)
@@ -46,41 +79,52 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			//  If the Metal API validation is enabled, we can find out more information about what
 			//  went wrong.  (Metal API validation is enabled by default when a debug build is run
 			//  from Xcode)
-			throw "Failed to created pipeline state, error \(error)";
-			
+			print("Failed to created pipeline state, error \(error)")
+			fatalError("Failed to created pipeline state, error \(error)")
 		}
 		
 		// Create the command queue
 		commandQueue = device.makeCommandQueue()
 		
-		// Load the .OBJ file
-		guard let url = Bundle.main.url(forResource: "capsule", withExtension: "obj") else {
-			fatalError("Failed to find model file.")
-		}
-		
-		let asset = MDLAsset.init(url: url)
-		guard let mesh = asset.object(at: 0) as? MDLMesh else {
-			fatalError("Failed to get mesh from asset.")
-		}
+		print("Loading obj file...")
+		let testMesh : ObjMesh = ObjMesh.init(objName: "Turntable", device: device)
+		self.mesh = testMesh.meshes.first!
+
 		print("Vertex count: \(mesh.vertexCount)")
-		self.mesh = mesh
 		
 		super.init()
 	}
 	
+	func setupUniforms(renderEncoder : MTLRenderCommandEncoder){
+		
+		// Set the region of the drawable to which we'll draw.
+		renderEncoder.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
+		renderEncoder.setRenderPipelineState(pipelineState)
+		renderEncoder.setDepthStencilState(depthStencilState)
+		renderEncoder.setCullMode(.back)
+		renderEncoder.setFrontFacing(.counterClockwise)
+		
+		let scaled = scalingMatrix(1)
+		let rotated = rotationMatrix(90, float3(0, 1, 0))
+		let translated = translationMatrix(float3(0, 0, 0))
+		let modelMatrix = matrix_multiply(matrix_multiply(translated, rotated), scaled)
+		let cameraPosition = float3(0, 0, -50)
+		let viewMatrix = translationMatrix(cameraPosition)
+		let aspect = Float(viewportSize.x / viewportSize.y)
+		let projMatrix = projectionMatrix(0.1, far: 1000, aspect: aspect, fovy: 1)
+		let modelViewProjectionMatrix = matrix_multiply(projMatrix, matrix_multiply(viewMatrix, modelMatrix))
+		
+		// fill uniform buffer:
+		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<matrix_float4x4>.size, options: [])
+		
+		let mvpMatrix = Uniforms(modelViewProjectionMatrix: modelViewProjectionMatrix)
+		uniformsBuffer.contents().storeBytes(of: mvpMatrix, toByteOffset: 0, as: Uniforms.self)
+		
+		renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
+
+	}
+	
 	func draw(in view: MTKView) {
-		
-		let meshes = try MTKMesh.newMeshes(from: asset, device: device!, sourceMeshes: nil)
-		
-		
-		let vertices : [Vertex] = []
-		
-//		let vertices = [
-//			Vertex(position: float3(100, -100, 0) , color: float4(1, 0, 0, 1)),
-//			Vertex(position: float3(100, 100, 0)  , color: float4(0, 1, 0, 1)),
-//			Vertex(position: float3(-100, 100, 0) , color: float4(0, 0, 1, 1)),
-//			Vertex(position: float3(-100, -100, 0), color: float4(0, 0, 0, 1))
-//		]
 		
 		// Create a new command buffer for each render pass to the current drawable
 		let buffer = commandQueue.makeCommandBuffer()
@@ -95,33 +139,18 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let renderEncoder : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor!)
 			renderEncoder.label = "AndyRenderEncoder";
 			
-			// Set the region of the drawable to which we'll draw.
-			renderEncoder.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
-			renderEncoder.setRenderPipelineState(pipelineState)
+			self.setupUniforms(renderEncoder: renderEncoder)
 			
-			// We call -[MTLRenderCommandEncoder setVertexBytes:length:atIndex:] to send data from our
-			//   Application ObjC code here to our Metal 'vertexShader' function
-			// This call has 3 arguments
-			//   1) A pointer to the memory we want to pass to our shader
-			//   2) The memory size of the data we want passed down
-			//   3) An integer index which corresponds to the index of the buffer attribute qualifier
-			//      of the argument in our 'vertexShader' function
+			// step 4: set up Metal rendering and drawing of meshes
 			
-			// You send a pointer to the `triangleVertices` array also and indicate its size
-			// The `BufferArgumentIndexVertices` enum value corresponds to the `vertexArray`
-			// argument in the `vertexShader` function because its buffer attribute also uses
-			// the `BufferArgumentIndexVertices` enum value for its index
-			let pos = MemoryLayout<Vertex>.stride * vertices.count;
-			renderEncoder.setVertexBytes(vertices, length: pos, at: Int(BufferArgumentIndexVertices.rawValue) )
+			let vertexBuffer = mesh.vertexBuffers[0]
+			renderEncoder.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
+			let submesh = mesh.submeshes[10]
+//			guard let submesh = mesh.submeshes.first else {
+//				fatalError("Submesh not found.")
+//			}
+			renderEncoder.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
 			
-			// You send a pointer to `_viewportSize` and also indicate its size
-			// The `BufferArgumentIndexViewportSize` enum value corresponds to the
-			// `viewportSizePointer` argument in the `vertexShader` function because its
-			//  buffer attribute also uses the `BufferArgumentIndexViewportSize` enum value
-			//  for its index
-			renderEncoder.setVertexBytes(&viewportSize, length: MemoryLayout<vector_uint2>.stride, at: Int(BufferArgumentIndexViewportSize.rawValue))
-			
-			renderEncoder.drawPrimitives(type: MTLPrimitiveType.triangle, vertexStart: 0, vertexCount: vertices.count)
 			renderEncoder.endEncoding()
 			
 			// Schedule a present once the framebuffer is complete using the current drawable

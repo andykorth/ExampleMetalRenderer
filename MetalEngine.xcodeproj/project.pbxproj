@@ -17,12 +17,13 @@
 		752C25C720B5F5C100959877 /* house_obj.obj in Resources */ = {isa = PBXBuildFile; fileRef = 752C25C320B5F5C000959877 /* house_obj.obj */; };
 		752C25C820B5F5C100959877 /* hull_test_A.obj in Resources */ = {isa = PBXBuildFile; fileRef = 752C25C420B5F5C100959877 /* hull_test_A.obj */; };
 		752C25CB20B5F9A300959877 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CA20B5F9A300959877 /* MetalRenderer.swift */; };
+		752C25CD20B740A000959877 /* ObjMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CC20B740A000959877 /* ObjMesh.swift */; };
+		752C25CF20B8A8BA00959877 /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CE20B8A8BA00959877 /* MathUtils.swift */; };
+		752C25D120B90BBB00959877 /* Farmhouse.obj in Resources */ = {isa = PBXBuildFile; fileRef = 752C25D020B90ADE00959877 /* Farmhouse.obj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3A05CBDE1F731AB800CA21B1 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = ../../../../iPhoneOS.platform/Developer/SDKs/iPhoneOS11.0.sdk/System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		3A1F1B401F0338C6001622B3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
-		3A1F1B411F0338CF001622B3 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = ../../../../AppleTVOS.platform/Developer/SDKs/AppleTVOS11.0.sdk/System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
 		3A3532861E99974500C194AD /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
 		3A3532871E99974500C194AD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		3A3532931E99974500C194AD /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -39,6 +40,9 @@
 		752C25C420B5F5C100959877 /* hull_test_A.obj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hull_test_A.obj; sourceTree = "<group>"; };
 		752C25C920B5F9A200959877 /* MetalEngine-macOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MetalEngine-macOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		752C25CA20B5F9A300959877 /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalRenderer.swift; sourceTree = "<group>"; };
+		752C25CC20B740A000959877 /* ObjMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjMesh.swift; sourceTree = "<group>"; };
+		752C25CE20B8A8BA00959877 /* MathUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtils.swift; sourceTree = "<group>"; };
+		752C25D020B90ADE00959877 /* Farmhouse.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = Farmhouse.obj; sourceTree = "<group>"; };
 		98A53EFB3A5DF1BBA8D07F7C /* SampleCode.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -86,9 +90,11 @@
 		3A3532831E99974500C194AD /* Renderer */ = {
 			isa = PBXGroup;
 			children = (
+				752C25CE20B8A8BA00959877 /* MathUtils.swift */,
 				3A3532861E99974500C194AD /* ShaderTypes.h */,
 				3A3532871E99974500C194AD /* Shaders.metal */,
 				752C25CA20B5F9A300959877 /* MetalRenderer.swift */,
+				752C25CC20B740A000959877 /* ObjMesh.swift */,
 				752C25C920B5F9A200959877 /* MetalEngine-macOS-Bridging-Header.h */,
 			);
 			path = Renderer;
@@ -118,8 +124,6 @@
 		3AE289861EEA0A9100DF4C9A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3A05CBDE1F731AB800CA21B1 /* MetalKit.framework */,
-				3A1F1B411F0338CF001622B3 /* MetalKit.framework */,
 				3A1F1B401F0338C6001622B3 /* MetalKit.framework */,
 			);
 			name = Frameworks;
@@ -128,6 +132,7 @@
 		752C25C020B5F5B200959877 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				752C25D020B90ADE00959877 /* Farmhouse.obj */,
 				752C25C120B5F5C000959877 /* capsule.obj */,
 				752C25C320B5F5C000959877 /* house_obj.obj */,
 				752C25C420B5F5C100959877 /* hull_test_A.obj */,
@@ -197,6 +202,7 @@
 			files = (
 				752C25C720B5F5C100959877 /* house_obj.obj in Resources */,
 				752C25C620B5F5C100959877 /* Turntable.obj in Resources */,
+				752C25D120B90BBB00959877 /* Farmhouse.obj in Resources */,
 				3A3532CC1E99974500C194AD /* Main.storyboard in Resources */,
 				752C25C520B5F5C100959877 /* capsule.obj in Resources */,
 				752C25C820B5F5C100959877 /* hull_test_A.obj in Resources */,
@@ -213,6 +219,8 @@
 				3A1F1B3D1F033827001622B3 /* AAPLViewController.m in Sources */,
 				63E77A1A1ED205A200E1E542 /* Shaders.metal in Sources */,
 				3A1F1B3E1F033846001622B3 /* main.m in Sources */,
+				752C25CF20B8A8BA00959877 /* MathUtils.swift in Sources */,
+				752C25CD20B740A000959877 /* ObjMesh.swift in Sources */,
 				752C25CB20B5F9A300959877 /* MetalRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
