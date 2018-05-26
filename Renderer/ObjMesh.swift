@@ -19,6 +19,16 @@ class ObjMesh {
 		
 		// step 2: set up the asset initialization
 		
+		vertexDescriptor.attributes[0].offset = 0
+		vertexDescriptor.attributes[0].format = MTLVertexFormat.float3 // position
+		vertexDescriptor.attributes[1].offset = 12
+		vertexDescriptor.attributes[1].format = MTLVertexFormat.uchar4 // color
+		vertexDescriptor.attributes[2].offset = 16
+		vertexDescriptor.attributes[2].format = MTLVertexFormat.half2 // texture
+		vertexDescriptor.attributes[3].offset = 20
+		vertexDescriptor.attributes[3].format = MTLVertexFormat.float // occlusion
+		vertexDescriptor.layouts[0].stride = 24
+		
 		let desc = MTKModelIOVertexDescriptorFromMetal(vertexDescriptor)
 		var attribute = desc.attributes[0] as! MDLVertexAttribute
 		attribute.name = MDLVertexAttributePosition
@@ -32,6 +42,8 @@ class ObjMesh {
 		guard let url = Bundle.main.url(forResource: objName, withExtension: "obj") else {
 			fatalError("Resource not found.")
 		}
+		print("Load asset from url : \(url)")
+		
 		let asset = MDLAsset(url: url, vertexDescriptor: desc, bufferAllocator: mtkBufferAllocator)
 		
 		//        let url1 = URL(string: "/Users/YourUsername/Desktop/exported.obj")
@@ -56,9 +68,13 @@ class ObjMesh {
 		guard let mesh = asset.object(at: 0) as? MDLMesh else {
 			fatalError("Mesh not found.")
 		}
-		mesh.generateAmbientOcclusionVertexColors(withQuality: 1, attenuationFactor: 0.98, objectsToConsider: [mesh], vertexAttributeNamed: MDLVertexAttributeOcclusionValue)
+//		mesh.generateAmbientOcclusionVertexColors(withQuality: 1, attenuationFactor: 0.98, objectsToConsider: [mesh], vertexAttributeNamed: MDLVertexAttributeOcclusionValue)
+		print("Generating mesh from : \(asset)")
 		do {
-			meshes = try MTKMesh.newMeshes(from: asset, device: device, sourceMeshes: nil)
+			let v = try MTKMesh.newMeshes(asset: asset, device: device)
+			meshes = v.metalKitMeshes
+
+//			meshes = try MTKMesh.newMeshes(asset: asset, device: device)
 		}
 		catch let error {
 			fatalError("\(error)")
