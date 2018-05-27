@@ -14,10 +14,15 @@
 - (void)drawRect:(NSRect)dirtyRect {
     [super drawRect:dirtyRect];
 	[renderer drawInMTKView:self];
+
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
 	[renderer mouseX: [theEvent deltaX] mouseY: [theEvent deltaY]];
+}
+
+- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size{
+	[renderer mtkView:self drawableSizeWillChange:size];
 }
 
 @end

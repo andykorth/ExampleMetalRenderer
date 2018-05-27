@@ -40,6 +40,7 @@ Implementation of our cross-platform view controller
     // Initialize our renderer with the view size
     [_renderer mtkView:_view drawableSizeWillChange:_view.drawableSize];
 	_view->renderer = _renderer;
+	_view.delegate = _view;
 
    // _view.delegate = _renderer;
 }

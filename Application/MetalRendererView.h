@@ -9,7 +9,7 @@
 #import <MetalKit/MetalKit.h>
 #import "MetalEngine-Swift.h"
 
-@interface MetalRendererView : MTKView
+@interface MetalRendererView : MTKView <MTKViewDelegate>
 {
 	@public
 	MetalRenderer *renderer;
