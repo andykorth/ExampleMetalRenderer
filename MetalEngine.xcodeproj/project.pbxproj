@@ -20,6 +20,7 @@
 		752C25CD20B740A000959877 /* ObjMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CC20B740A000959877 /* ObjMesh.swift */; };
 		752C25CF20B8A8BA00959877 /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CE20B8A8BA00959877 /* MathUtils.swift */; };
 		752C25D120B90BBB00959877 /* Farmhouse.obj in Resources */ = {isa = PBXBuildFile; fileRef = 752C25D020B90ADE00959877 /* Farmhouse.obj */; };
+		752C25D720BA44D200959877 /* MetalRendererView.m in Sources */ = {isa = PBXBuildFile; fileRef = 752C25D520BA44CE00959877 /* MetalRendererView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,8 @@
 		752C25CC20B740A000959877 /* ObjMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjMesh.swift; sourceTree = "<group>"; };
 		752C25CE20B8A8BA00959877 /* MathUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathUtils.swift; sourceTree = "<group>"; };
 		752C25D020B90ADE00959877 /* Farmhouse.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = Farmhouse.obj; sourceTree = "<group>"; };
+		752C25D520BA44CE00959877 /* MetalRendererView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetalRendererView.m; sourceTree = "<group>"; };
+		752C25D620BA44D200959877 /* MetalRendererView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetalRendererView.h; sourceTree = "<group>"; };
 		98A53EFB3A5DF1BBA8D07F7C /* SampleCode.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -115,6 +118,8 @@
 				3ACD21341EAE60D2000D1DED /* AAPLAppDelegate.m */,
 				3A35329B1E99974500C194AD /* AAPLViewController.h */,
 				3A35329C1E99974500C194AD /* AAPLViewController.m */,
+				752C25D620BA44D200959877 /* MetalRendererView.h */,
+				752C25D520BA44CE00959877 /* MetalRendererView.m */,
 				3A3532931E99974500C194AD /* main.m */,
 				3A1F1B361F0336DB001622B3 /* macOS */,
 			);
@@ -220,6 +225,7 @@
 				63E77A1A1ED205A200E1E542 /* Shaders.metal in Sources */,
 				3A1F1B3E1F033846001622B3 /* main.m in Sources */,
 				752C25CF20B8A8BA00959877 /* MathUtils.swift in Sources */,
+				752C25D720BA44D200959877 /* MetalRendererView.m in Sources */,
 				752C25CD20B740A000959877 /* ObjMesh.swift in Sources */,
 				752C25CB20B5F9A300959877 /* MetalRenderer.swift in Sources */,
 			);

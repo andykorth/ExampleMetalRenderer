@@ -7,11 +7,11 @@ Implementation of our cross-platform view controller
 
 #import "AAPLViewController.h"
 #import "MetalEngine-Swift.h"
+#import "MetalRendererView.h"
 
 @implementation AAPLViewController
 {
-    MTKView *_view;
-
+    MetalRendererView *_view;
     MetalRenderer *_renderer;
 }
 
@@ -20,7 +20,7 @@ Implementation of our cross-platform view controller
     [super viewDidLoad];
 
     // Set the view to use the default device
-    _view = (MTKView *)self.view;
+    _view = (MetalRendererView *)self.view;
     _view.device = MTLCreateSystemDefaultDevice();
 
     if(!_view.device)
@@ -39,8 +39,11 @@ Implementation of our cross-platform view controller
 
     // Initialize our renderer with the view size
     [_renderer mtkView:_view drawableSizeWillChange:_view.drawableSize];
+	_view->renderer = _renderer;
 
-    _view.delegate = _renderer;
+   // _view.delegate = _renderer;
 }
+
+
 
 @end

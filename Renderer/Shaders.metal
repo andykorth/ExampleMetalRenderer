@@ -65,7 +65,8 @@ fragment half4 fragmentShader(VertexOut fragments [[stage_in]],
 	float4 occlusion = fragments.occlusion;
 	constexpr sampler samplers;
 	float4 texture = textures.sample(samplers, fragments.texCoords);
-	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
+//	return half4(occlusion.r, occlusion.g, occlusion.b, 1); //half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
 	//return half4(baseColor.r, baseColor.g, baseColor.b, 1);
-//	return half4(baseColor * occlusion * texture);
+	//return half4(baseColor * occlusion * texture);
+	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
 }

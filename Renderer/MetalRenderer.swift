@@ -25,8 +25,14 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	// better place to put this?
 	let depthStencilState : MTLDepthStencilState
 	
+	// input:
+	var scrollX : Float = 0
+	var scrollY : Float = 0
+	var zoom : Float = 0
 	
 	init(view : MTKView) throws {
+
+		
 		// perform some initialization here
 		device = view.device!
 		viewportSize = vector_uint2(0, 0)
@@ -93,6 +99,18 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		print("Vertex count: \(mesh.vertexCount)")
 		
 		super.init()
+		
+	}
+	
+	func mouseDragged(theEvent : NSEvent) {
+		mouseX(Float(theEvent.deltaX), mouseY: Float(theEvent.deltaY))
+	}
+	
+	func mouseX(_ dx : Float, mouseY dy : Float){
+		//print("mouse moved: \(dx), \(dy)")
+		
+		scrollX = (scrollX + dx)//.truncatingRemainder(dividingBy: 360.0)
+		scrollY = (scrollY + dy)//.truncatingRemainder(dividingBy: 360.0)
 	}
 	
 	func setupUniforms(renderEncoder : MTLRenderCommandEncoder){
@@ -105,13 +123,14 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		renderEncoder.setFrontFacing(.counterClockwise)
 		
 		let scaled = scalingMatrix(1)
-		let rotated = rotationMatrix(90, float3(0, 1, 0))
+		let rotated = matrix_multiply( rotationMatrix(scrollY / -100.0, float3(1, 0, 0)),
+			rotationMatrix(scrollX / -100.0, float3(0, 1, 0)) )
 		let translated = translationMatrix(float3(0, 0, 0))
 		let modelMatrix = matrix_multiply(matrix_multiply(translated, rotated), scaled)
-		let cameraPosition = float3(0, 0, -50)
+		let cameraPosition = float3(0, -5, -25 + zoom)
 		let viewMatrix = translationMatrix(cameraPosition)
 		let aspect = Float(viewportSize.x / viewportSize.y)
-		let projMatrix = projectionMatrix(0.1, far: 1000, aspect: aspect, fovy: 1)
+		let projMatrix = projectionMatrix(0.1, far: 200, aspect: aspect, fovy: 1)
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, matrix_multiply(viewMatrix, modelMatrix))
 		
 		// fill uniform buffer:
@@ -123,7 +142,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
 
 	}
-	
+
 	func draw(in view: MTKView) {
 		
 		// Create a new command buffer for each render pass to the current drawable
@@ -167,6 +186,4 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		viewportSize.x = UInt32(size.width)
 		viewportSize.y = UInt32(size.height)
 	}
-	
-	
 }
