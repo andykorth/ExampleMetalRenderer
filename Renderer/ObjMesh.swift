@@ -14,6 +14,15 @@ class ObjMesh {
 	
 	var meshes: [MTKMesh]
 	let vertexDescriptor = MTLVertexDescriptor()
+	var loader : MTKTextureLoader;
+	// submesh then texture index
+	var textures: [Int : [Int: MTLTexture]]
+	
+	var mesh : MTKMesh {
+		get{
+			return meshes.first!
+		}
+	}
 	
 	init(objName : String, device : MTLDevice) {
 		
@@ -46,30 +55,14 @@ class ObjMesh {
 		
 		let asset = MDLAsset(url: url, vertexDescriptor: desc, bufferAllocator: mtkBufferAllocator)
 		
-		//        let url1 = URL(string: "/Users/YourUsername/Desktop/exported.obj")
-		//        try! asset.export(to: url1!)
-		
-		//let loader = MTKTextureLoader(device: device)
-//		guard let file = Bundle.main.path(forResource: objName, ofType: "png") else {
-//			fatalError("Resource not found.")
-//		}
-		/*
-		do {
-			let data = try Data(contentsOf: URL(fileURLWithPath: file))
-			//texture = try loader.newTexture(with: data, options: nil)
-		}
-		catch let error {
-			fatalError("\(error)")
-		}
-		*/
-		
 		// step 3: set up MetalKit mesh and submesh objects
+		loader = MTKTextureLoader(device: device)
 		
 		guard let mesh = asset.object(at: 0) as? MDLMesh else {
 			fatalError("Mesh not found.")
 		}
 //		mesh.generateAmbientOcclusionVertexColors(withQuality: 1, attenuationFactor: 0.98, objectsToConsider: [mesh], vertexAttributeNamed: MDLVertexAttributeOcclusionValue)
-		print("Generating mesh from : \(asset)")
+		print("Generating mesh from : \(asset) was \(mesh)")
 		do {
 			let v = try MTKMesh.newMeshes(asset: asset, device: device)
 			meshes = v.metalKitMeshes
@@ -79,5 +72,36 @@ class ObjMesh {
 		catch let error {
 			fatalError("\(error)")
 		}
+		
+		var i : Int = 0
+		for submesh in meshes.first!.submeshes {
+			print("     Submesh \(i) was named \(submesh.name)")
+			i += 1
+		}
+		
+		textures = [0: [Int:MTLTexture]()]
+	}
+	
+	func addTexture(name objName : String, index texIndex : Int, forSubmesh submesh : Int){
+		guard let file = Bundle.main.path(forResource: objName, ofType: "png") else {
+			fatalError("Resource not found.")
+		}
+		
+		do {
+			let data = try Data(contentsOf: URL(fileURLWithPath: file))
+			
+			let textureLoaderOptions: [String: NSObject]
+			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB") ]
+
+			let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
+			if textures[submesh] == nil{
+				textures[submesh] = [Int : MTLTexture]()
+			}
+			textures[submesh]![texIndex] = texture;
+		}
+		catch let error {
+			fatalError("\(error)")
+		}
+		
 	}
 }

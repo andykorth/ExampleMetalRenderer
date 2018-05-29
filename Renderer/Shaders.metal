@@ -59,14 +59,32 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 }
 
 fragment half4 fragmentShader(VertexOut fragments [[stage_in]],
-							 texture2d<float> textures [[texture(0)]])
+							  texture2d<float> diffuseTex [[texture(0)]],
+							  texture2d<float> specularTex [[texture(1)]],
+							  texture2d<float> glowTex [[texture(2)]]
+
+							  )
 {
 	float4 baseColor = fragments.color;
 	float4 occlusion = fragments.occlusion;
-	constexpr sampler samplers;
-	float4 texture = textures.sample(samplers, fragments.texCoords);
+	constexpr sampler linearSampler(s_address::repeat,
+									t_address::repeat,
+									mip_filter::linear,
+									mag_filter::linear,
+									min_filter::linear);
+	
+	float2 uv = fragments.texCoords;
+	uv.y = 1 - uv.y;
+	
+	float4 diffuse = diffuseTex.sample(linearSampler, uv);
+	float4 spec = specularTex.sample(linearSampler, uv);
+	float4 glow = glowTex.sample(linearSampler, uv);
 //	return half4(occlusion.r, occlusion.g, occlusion.b, 1); //half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
 	//return half4(baseColor.r, baseColor.g, baseColor.b, 1);
 	//return half4(baseColor * occlusion * texture);
-	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
+//	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
+	//return half4(glow.r, glow.g, glow.b, 1);
+
+	//return half4(spec.a, spec.a, spec.a, 1);
+	return half4(diffuse);// + half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
 }

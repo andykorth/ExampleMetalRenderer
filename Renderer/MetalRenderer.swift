@@ -19,8 +19,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var pipelineState : MTLRenderPipelineState
 	var commandQueue : MTLCommandQueue
 	var viewportSize : vector_uint2
-	var mesh : MTKMesh
 	var view : MTKView
+	var objMesh : ObjMesh
 	
 	// better place to put this?
 	let depthStencilState : MTLDepthStencilState
@@ -93,10 +93,16 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		commandQueue = device.makeCommandQueue()
 		
 		print("Loading obj file...")
-		let testMesh : ObjMesh = ObjMesh.init(objName: "Turntable", device: device)
-		self.mesh = testMesh.meshes.first!
+		objMesh = ObjMesh.init(objName: "Turntable", device: device)
+		objMesh.addTexture(name: "moped_d", index: 0, forSubmesh: 10)
+		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
+		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
 
-		print("Vertex count: \(mesh.vertexCount)")
+		objMesh.addTexture(name: "turntable_d", index: 0, forSubmesh: 9)
+		objMesh.addTexture(name: "turntable_s", index: 1, forSubmesh: 9)
+		objMesh.addTexture(name: "turntable_n", index: 2, forSubmesh: 9)
+
+		print("Vertex count: \(objMesh.mesh.vertexCount)")
 		
 		super.init()
 		
@@ -155,20 +161,29 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		if(renderPassDescriptor != nil)
 		{
 			// Create a render command encoder so we can render into something
-			let renderEncoder : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor!)
-			renderEncoder.label = "AndyRenderEncoder";
+			let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor!)
+			renderCommands.label = "AndyRenderEncoder";
 			
-			self.setupUniforms(renderEncoder: renderEncoder)
+			self.setupUniforms(renderEncoder: renderCommands)
 			
 			// step 4: set up Metal rendering and drawing of meshes
 			
-			let vertexBuffer = mesh.vertexBuffers[0]
-			renderEncoder.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
+			let vertexBuffer = objMesh.mesh.vertexBuffers[0]
+			renderCommands.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
 			
-			for submesh in mesh.submeshes {
-				renderEncoder.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
+			for (submeshIndex, submesh) in  objMesh.mesh.submeshes.enumerated() {
+//				let submesh = objMesh.mesh.submeshes[submeshIndex]
+				// bind the appropriate textures for the submeshes:
+				
+				if let submeshArray = objMesh.textures[submeshIndex] {
+					// now val is not nil and the Optional has been unwrapped, so use it
+					for i in 0 ... submeshArray.count {
+						renderCommands.setFragmentTexture(submeshArray[i], at: i)
+					}
+				}
+				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
 			}
-			renderEncoder.endEncoding()
+			renderCommands.endEncoding()
 			
 			// Schedule a present once the framebuffer is complete using the current drawable
 			buffer.present(view.currentDrawable!)

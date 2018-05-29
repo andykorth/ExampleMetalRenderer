@@ -21,6 +21,60 @@
 		752C25CF20B8A8BA00959877 /* MathUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 752C25CE20B8A8BA00959877 /* MathUtils.swift */; };
 		752C25D120B90BBB00959877 /* Farmhouse.obj in Resources */ = {isa = PBXBuildFile; fileRef = 752C25D020B90ADE00959877 /* Farmhouse.obj */; };
 		752C25D720BA44D200959877 /* MetalRendererView.m in Sources */ = {isa = PBXBuildFile; fileRef = 752C25D520BA44CE00959877 /* MetalRendererView.m */; };
+		752C261020BDD7A000959877 /* turntable_s.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25D920BDD79F00959877 /* turntable_s.png */; };
+		752C261120BDD7A000959877 /* turntable_d.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DA20BDD79F00959877 /* turntable_d.png */; };
+		752C261220BDD7A000959877 /* moped_glow.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DB20BDD79F00959877 /* moped_glow.png */; };
+		752C261320BDD7A000959877 /* moped_s.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DC20BDD79F00959877 /* moped_s.png */; };
+		752C261420BDD7A000959877 /* moped_d.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DD20BDD79F00959877 /* moped_d.png */; };
+		752C261520BDD7A000959877 /* lights_n.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DE20BDD79F00959877 /* lights_n.png */; };
+		752C261620BDD7A000959877 /* moped_dhalf.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25DF20BDD79F00959877 /* moped_dhalf.png */; };
+		752C261720BDD7A000959877 /* lights_glow.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E020BDD79F00959877 /* lights_glow.png */; };
+		752C261820BDD7A000959877 /* lights_s.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E120BDD79F00959877 /* lights_s.png */; };
+		752C261920BDD7A000959877 /* lights_d.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E220BDD79F00959877 /* lights_d.png */; };
+		752C261A20BDD7A000959877 /* turntable_n.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E320BDD79F00959877 /* turntable_n.png */; };
+		752C261B20BDD7A000959877 /* rainbow.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E420BDD79F00959877 /* rainbow.png */; };
+		752C261C20BDD7A000959877 /* CrappySunset_SPEC_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E620BDD79F00959877 /* CrappySunset_SPEC_yNeg.png */; };
+		752C261D20BDD7A000959877 /* austriaLDR_SPEC_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E720BDD79F00959877 /* austriaLDR_SPEC_yPos.png */; };
+		752C261E20BDD7A000959877 /* austriaLDR_SKY_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E820BDD79F00959877 /* austriaLDR_SKY_yNeg.png */; };
+		752C261F20BDD7A000959877 /* austriaLDR_SKY_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25E920BDD79F00959877 /* austriaLDR_SKY_yPos.png */; };
+		752C262020BDD7A000959877 /* austriaLDR_SPEC_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25EA20BDD79F00959877 /* austriaLDR_SPEC_yNeg.png */; };
+		752C262120BDD7A000959877 /* CrappySunset_SPEC_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25EB20BDD79F00959877 /* CrappySunset_SPEC_yPos.png */; };
+		752C262220BDD7A000959877 /* miramar_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25EC20BDD79F00959877 /* miramar_xNeg.png */; };
+		752C262320BDD7A000959877 /* CrappySunset_DIFF_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25ED20BDD79F00959877 /* CrappySunset_DIFF_xNeg.png */; };
+		752C262420BDD7A000959877 /* austriaLDR_DIFF_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25EE20BDD79F00959877 /* austriaLDR_DIFF_xPos.png */; };
+		752C262520BDD7A000959877 /* miramar_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25EF20BDD7A000959877 /* miramar_zPos.png */; };
+		752C262620BDD7A000959877 /* CrappySunset_DIFF_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F020BDD7A000959877 /* CrappySunset_DIFF_zPos.png */; };
+		752C262720BDD7A000959877 /* austriaLDR_DIFF_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F120BDD7A000959877 /* austriaLDR_DIFF_zNeg.png */; };
+		752C262820BDD7A000959877 /* CrappySunset_SKY_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F220BDD7A000959877 /* CrappySunset_SKY_yPos.png */; };
+		752C262920BDD7A000959877 /* CrappySunset_SKY_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F320BDD7A000959877 /* CrappySunset_SKY_yNeg.png */; };
+		752C262A20BDD7A000959877 /* austriaLDR_DIFF_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F420BDD7A000959877 /* austriaLDR_DIFF_zPos.png */; };
+		752C262B20BDD7A000959877 /* CrappySunset_DIFF_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F520BDD7A000959877 /* CrappySunset_DIFF_zNeg.png */; };
+		752C262C20BDD7A000959877 /* miramar_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F620BDD7A000959877 /* miramar_zNeg.png */; };
+		752C262D20BDD7A000959877 /* austriaLDR_DIFF_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F720BDD7A000959877 /* austriaLDR_DIFF_xNeg.png */; };
+		752C262E20BDD7A000959877 /* CrappySunset_DIFF_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F820BDD7A000959877 /* CrappySunset_DIFF_xPos.png */; };
+		752C262F20BDD7A000959877 /* miramar_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25F920BDD7A000959877 /* miramar_xPos.png */; };
+		752C263020BDD7A000959877 /* austriaLDR_SPEC_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FA20BDD7A000959877 /* austriaLDR_SPEC_zNeg.png */; };
+		752C263120BDD7A000959877 /* austriaLDR_SKY_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FB20BDD7A000959877 /* austriaLDR_SKY_xNeg.png */; };
+		752C263220BDD7A000959877 /* CrappySunset_SPEC_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FC20BDD7A000959877 /* CrappySunset_SPEC_zPos.png */; };
+		752C263320BDD7A000959877 /* austriaLDR_SPEC_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FD20BDD7A000959877 /* austriaLDR_SPEC_xPos.png */; };
+		752C263420BDD7A000959877 /* CrappySunset_SPEC_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FE20BDD7A000959877 /* CrappySunset_SPEC_xNeg.png */; };
+		752C263520BDD7A000959877 /* austriaLDR_SKY_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C25FF20BDD7A000959877 /* austriaLDR_SKY_zPos.png */; };
+		752C263620BDD7A000959877 /* austriaLDR_SKY_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260020BDD7A000959877 /* austriaLDR_SKY_zNeg.png */; };
+		752C263720BDD7A000959877 /* CrappySunset_SPEC_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260120BDD7A000959877 /* CrappySunset_SPEC_xPos.png */; };
+		752C263820BDD7A000959877 /* austriaLDR_SPEC_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260220BDD7A000959877 /* austriaLDR_SPEC_xNeg.png */; };
+		752C263920BDD7A000959877 /* CrappySunset_SPEC_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260320BDD7A000959877 /* CrappySunset_SPEC_zNeg.png */; };
+		752C263A20BDD7A000959877 /* austriaLDR_SKY_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260420BDD7A000959877 /* austriaLDR_SKY_xPos.png */; };
+		752C263B20BDD7A000959877 /* austriaLDR_SPEC_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260520BDD7A000959877 /* austriaLDR_SPEC_zPos.png */; };
+		752C263C20BDD7A000959877 /* CrappySunset_SKY_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260620BDD7A000959877 /* CrappySunset_SKY_zNeg.png */; };
+		752C263D20BDD7A000959877 /* CrappySunset_SKY_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260720BDD7A000959877 /* CrappySunset_SKY_xPos.png */; };
+		752C263E20BDD7A000959877 /* miramar_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260820BDD7A000959877 /* miramar_yNeg.png */; };
+		752C263F20BDD7A000959877 /* austriaLDR_DIFF_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260920BDD7A000959877 /* austriaLDR_DIFF_yPos.png */; };
+		752C264020BDD7A000959877 /* CrappySunset_DIFF_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260A20BDD7A000959877 /* CrappySunset_DIFF_yNeg.png */; };
+		752C264120BDD7A000959877 /* CrappySunset_DIFF_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260B20BDD7A000959877 /* CrappySunset_DIFF_yPos.png */; };
+		752C264220BDD7A000959877 /* austriaLDR_DIFF_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260C20BDD7A000959877 /* austriaLDR_DIFF_yNeg.png */; };
+		752C264320BDD7A000959877 /* miramar_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260D20BDD7A000959877 /* miramar_yPos.png */; };
+		752C264420BDD7A000959877 /* CrappySunset_SKY_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260E20BDD7A000959877 /* CrappySunset_SKY_xNeg.png */; };
+		752C264520BDD7A000959877 /* CrappySunset_SKY_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260F20BDD7A000959877 /* CrappySunset_SKY_zPos.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +100,60 @@
 		752C25D020B90ADE00959877 /* Farmhouse.obj */ = {isa = PBXFileReference; lastKnownFileType = text; path = Farmhouse.obj; sourceTree = "<group>"; };
 		752C25D520BA44CE00959877 /* MetalRendererView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MetalRendererView.m; sourceTree = "<group>"; };
 		752C25D620BA44D200959877 /* MetalRendererView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MetalRendererView.h; sourceTree = "<group>"; };
+		752C25D920BDD79F00959877 /* turntable_s.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = turntable_s.png; sourceTree = "<group>"; };
+		752C25DA20BDD79F00959877 /* turntable_d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = turntable_d.png; sourceTree = "<group>"; };
+		752C25DB20BDD79F00959877 /* moped_glow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moped_glow.png; sourceTree = "<group>"; };
+		752C25DC20BDD79F00959877 /* moped_s.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moped_s.png; sourceTree = "<group>"; };
+		752C25DD20BDD79F00959877 /* moped_d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moped_d.png; sourceTree = "<group>"; };
+		752C25DE20BDD79F00959877 /* lights_n.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lights_n.png; sourceTree = "<group>"; };
+		752C25DF20BDD79F00959877 /* moped_dhalf.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moped_dhalf.png; sourceTree = "<group>"; };
+		752C25E020BDD79F00959877 /* lights_glow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lights_glow.png; sourceTree = "<group>"; };
+		752C25E120BDD79F00959877 /* lights_s.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lights_s.png; sourceTree = "<group>"; };
+		752C25E220BDD79F00959877 /* lights_d.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lights_d.png; sourceTree = "<group>"; };
+		752C25E320BDD79F00959877 /* turntable_n.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = turntable_n.png; sourceTree = "<group>"; };
+		752C25E420BDD79F00959877 /* rainbow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rainbow.png; sourceTree = "<group>"; };
+		752C25E620BDD79F00959877 /* CrappySunset_SPEC_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_yNeg.png; sourceTree = "<group>"; };
+		752C25E720BDD79F00959877 /* austriaLDR_SPEC_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_yPos.png; sourceTree = "<group>"; };
+		752C25E820BDD79F00959877 /* austriaLDR_SKY_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_yNeg.png; sourceTree = "<group>"; };
+		752C25E920BDD79F00959877 /* austriaLDR_SKY_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_yPos.png; sourceTree = "<group>"; };
+		752C25EA20BDD79F00959877 /* austriaLDR_SPEC_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_yNeg.png; sourceTree = "<group>"; };
+		752C25EB20BDD79F00959877 /* CrappySunset_SPEC_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_yPos.png; sourceTree = "<group>"; };
+		752C25EC20BDD79F00959877 /* miramar_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_xNeg.png; sourceTree = "<group>"; };
+		752C25ED20BDD79F00959877 /* CrappySunset_DIFF_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_xNeg.png; sourceTree = "<group>"; };
+		752C25EE20BDD79F00959877 /* austriaLDR_DIFF_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_xPos.png; sourceTree = "<group>"; };
+		752C25EF20BDD7A000959877 /* miramar_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_zPos.png; sourceTree = "<group>"; };
+		752C25F020BDD7A000959877 /* CrappySunset_DIFF_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_zPos.png; sourceTree = "<group>"; };
+		752C25F120BDD7A000959877 /* austriaLDR_DIFF_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_zNeg.png; sourceTree = "<group>"; };
+		752C25F220BDD7A000959877 /* CrappySunset_SKY_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_yPos.png; sourceTree = "<group>"; };
+		752C25F320BDD7A000959877 /* CrappySunset_SKY_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_yNeg.png; sourceTree = "<group>"; };
+		752C25F420BDD7A000959877 /* austriaLDR_DIFF_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_zPos.png; sourceTree = "<group>"; };
+		752C25F520BDD7A000959877 /* CrappySunset_DIFF_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_zNeg.png; sourceTree = "<group>"; };
+		752C25F620BDD7A000959877 /* miramar_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_zNeg.png; sourceTree = "<group>"; };
+		752C25F720BDD7A000959877 /* austriaLDR_DIFF_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_xNeg.png; sourceTree = "<group>"; };
+		752C25F820BDD7A000959877 /* CrappySunset_DIFF_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_xPos.png; sourceTree = "<group>"; };
+		752C25F920BDD7A000959877 /* miramar_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_xPos.png; sourceTree = "<group>"; };
+		752C25FA20BDD7A000959877 /* austriaLDR_SPEC_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_zNeg.png; sourceTree = "<group>"; };
+		752C25FB20BDD7A000959877 /* austriaLDR_SKY_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_xNeg.png; sourceTree = "<group>"; };
+		752C25FC20BDD7A000959877 /* CrappySunset_SPEC_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_zPos.png; sourceTree = "<group>"; };
+		752C25FD20BDD7A000959877 /* austriaLDR_SPEC_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_xPos.png; sourceTree = "<group>"; };
+		752C25FE20BDD7A000959877 /* CrappySunset_SPEC_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_xNeg.png; sourceTree = "<group>"; };
+		752C25FF20BDD7A000959877 /* austriaLDR_SKY_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_zPos.png; sourceTree = "<group>"; };
+		752C260020BDD7A000959877 /* austriaLDR_SKY_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_zNeg.png; sourceTree = "<group>"; };
+		752C260120BDD7A000959877 /* CrappySunset_SPEC_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_xPos.png; sourceTree = "<group>"; };
+		752C260220BDD7A000959877 /* austriaLDR_SPEC_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_xNeg.png; sourceTree = "<group>"; };
+		752C260320BDD7A000959877 /* CrappySunset_SPEC_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SPEC_zNeg.png; sourceTree = "<group>"; };
+		752C260420BDD7A000959877 /* austriaLDR_SKY_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SKY_xPos.png; sourceTree = "<group>"; };
+		752C260520BDD7A000959877 /* austriaLDR_SPEC_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_SPEC_zPos.png; sourceTree = "<group>"; };
+		752C260620BDD7A000959877 /* CrappySunset_SKY_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_zNeg.png; sourceTree = "<group>"; };
+		752C260720BDD7A000959877 /* CrappySunset_SKY_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_xPos.png; sourceTree = "<group>"; };
+		752C260820BDD7A000959877 /* miramar_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_yNeg.png; sourceTree = "<group>"; };
+		752C260920BDD7A000959877 /* austriaLDR_DIFF_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_yPos.png; sourceTree = "<group>"; };
+		752C260A20BDD7A000959877 /* CrappySunset_DIFF_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_yNeg.png; sourceTree = "<group>"; };
+		752C260B20BDD7A000959877 /* CrappySunset_DIFF_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_DIFF_yPos.png; sourceTree = "<group>"; };
+		752C260C20BDD7A000959877 /* austriaLDR_DIFF_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = austriaLDR_DIFF_yNeg.png; sourceTree = "<group>"; };
+		752C260D20BDD7A000959877 /* miramar_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_yPos.png; sourceTree = "<group>"; };
+		752C260E20BDD7A000959877 /* CrappySunset_SKY_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_xNeg.png; sourceTree = "<group>"; };
+		752C260F20BDD7A000959877 /* CrappySunset_SKY_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_zPos.png; sourceTree = "<group>"; };
 		98A53EFB3A5DF1BBA8D07F7C /* SampleCode.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -137,6 +245,8 @@
 		752C25C020B5F5B200959877 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				752C25E520BDD79F00959877 /* cubemaps */,
+				752C25D820BDD79F00959877 /* moped */,
 				752C25D020B90ADE00959877 /* Farmhouse.obj */,
 				752C25C120B5F5C000959877 /* capsule.obj */,
 				752C25C320B5F5C000959877 /* house_obj.obj */,
@@ -144,6 +254,74 @@
 				752C25C220B5F5C000959877 /* Turntable.obj */,
 			);
 			path = Assets;
+			sourceTree = "<group>";
+		};
+		752C25D820BDD79F00959877 /* moped */ = {
+			isa = PBXGroup;
+			children = (
+				752C25D920BDD79F00959877 /* turntable_s.png */,
+				752C25DA20BDD79F00959877 /* turntable_d.png */,
+				752C25DB20BDD79F00959877 /* moped_glow.png */,
+				752C25DC20BDD79F00959877 /* moped_s.png */,
+				752C25DD20BDD79F00959877 /* moped_d.png */,
+				752C25DE20BDD79F00959877 /* lights_n.png */,
+				752C25DF20BDD79F00959877 /* moped_dhalf.png */,
+				752C25E020BDD79F00959877 /* lights_glow.png */,
+				752C25E120BDD79F00959877 /* lights_s.png */,
+				752C25E220BDD79F00959877 /* lights_d.png */,
+				752C25E320BDD79F00959877 /* turntable_n.png */,
+				752C25E420BDD79F00959877 /* rainbow.png */,
+			);
+			path = moped;
+			sourceTree = "<group>";
+		};
+		752C25E520BDD79F00959877 /* cubemaps */ = {
+			isa = PBXGroup;
+			children = (
+				752C25E620BDD79F00959877 /* CrappySunset_SPEC_yNeg.png */,
+				752C25E720BDD79F00959877 /* austriaLDR_SPEC_yPos.png */,
+				752C25E820BDD79F00959877 /* austriaLDR_SKY_yNeg.png */,
+				752C25E920BDD79F00959877 /* austriaLDR_SKY_yPos.png */,
+				752C25EA20BDD79F00959877 /* austriaLDR_SPEC_yNeg.png */,
+				752C25EB20BDD79F00959877 /* CrappySunset_SPEC_yPos.png */,
+				752C25EC20BDD79F00959877 /* miramar_xNeg.png */,
+				752C25ED20BDD79F00959877 /* CrappySunset_DIFF_xNeg.png */,
+				752C25EE20BDD79F00959877 /* austriaLDR_DIFF_xPos.png */,
+				752C25EF20BDD7A000959877 /* miramar_zPos.png */,
+				752C25F020BDD7A000959877 /* CrappySunset_DIFF_zPos.png */,
+				752C25F120BDD7A000959877 /* austriaLDR_DIFF_zNeg.png */,
+				752C25F220BDD7A000959877 /* CrappySunset_SKY_yPos.png */,
+				752C25F320BDD7A000959877 /* CrappySunset_SKY_yNeg.png */,
+				752C25F420BDD7A000959877 /* austriaLDR_DIFF_zPos.png */,
+				752C25F520BDD7A000959877 /* CrappySunset_DIFF_zNeg.png */,
+				752C25F620BDD7A000959877 /* miramar_zNeg.png */,
+				752C25F720BDD7A000959877 /* austriaLDR_DIFF_xNeg.png */,
+				752C25F820BDD7A000959877 /* CrappySunset_DIFF_xPos.png */,
+				752C25F920BDD7A000959877 /* miramar_xPos.png */,
+				752C25FA20BDD7A000959877 /* austriaLDR_SPEC_zNeg.png */,
+				752C25FB20BDD7A000959877 /* austriaLDR_SKY_xNeg.png */,
+				752C25FC20BDD7A000959877 /* CrappySunset_SPEC_zPos.png */,
+				752C25FD20BDD7A000959877 /* austriaLDR_SPEC_xPos.png */,
+				752C25FE20BDD7A000959877 /* CrappySunset_SPEC_xNeg.png */,
+				752C25FF20BDD7A000959877 /* austriaLDR_SKY_zPos.png */,
+				752C260020BDD7A000959877 /* austriaLDR_SKY_zNeg.png */,
+				752C260120BDD7A000959877 /* CrappySunset_SPEC_xPos.png */,
+				752C260220BDD7A000959877 /* austriaLDR_SPEC_xNeg.png */,
+				752C260320BDD7A000959877 /* CrappySunset_SPEC_zNeg.png */,
+				752C260420BDD7A000959877 /* austriaLDR_SKY_xPos.png */,
+				752C260520BDD7A000959877 /* austriaLDR_SPEC_zPos.png */,
+				752C260620BDD7A000959877 /* CrappySunset_SKY_zNeg.png */,
+				752C260720BDD7A000959877 /* CrappySunset_SKY_xPos.png */,
+				752C260820BDD7A000959877 /* miramar_yNeg.png */,
+				752C260920BDD7A000959877 /* austriaLDR_DIFF_yPos.png */,
+				752C260A20BDD7A000959877 /* CrappySunset_DIFF_yNeg.png */,
+				752C260B20BDD7A000959877 /* CrappySunset_DIFF_yPos.png */,
+				752C260C20BDD7A000959877 /* austriaLDR_DIFF_yNeg.png */,
+				752C260D20BDD7A000959877 /* miramar_yPos.png */,
+				752C260E20BDD7A000959877 /* CrappySunset_SKY_xNeg.png */,
+				752C260F20BDD7A000959877 /* CrappySunset_SKY_zPos.png */,
+			);
+			path = cubemaps;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -177,6 +355,7 @@
 				TargetAttributes = {
 					3A3532BE1E99974500C194AD = {
 						CreatedOnToolsVersion = 8.3;
+						DevelopmentTeam = 96LKF67VJA;
 						LastSwiftMigration = 0930;
 						ProvisioningStyle = Automatic;
 					};
@@ -205,12 +384,66 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				752C262220BDD7A000959877 /* miramar_xNeg.png in Resources */,
+				752C261020BDD7A000959877 /* turntable_s.png in Resources */,
+				752C261420BDD7A000959877 /* moped_d.png in Resources */,
+				752C262820BDD7A000959877 /* CrappySunset_SKY_yPos.png in Resources */,
+				752C262120BDD7A000959877 /* CrappySunset_SPEC_yPos.png in Resources */,
+				752C263720BDD7A000959877 /* CrappySunset_SPEC_xPos.png in Resources */,
+				752C262920BDD7A000959877 /* CrappySunset_SKY_yNeg.png in Resources */,
+				752C261E20BDD7A000959877 /* austriaLDR_SKY_yNeg.png in Resources */,
+				752C263820BDD7A000959877 /* austriaLDR_SPEC_xNeg.png in Resources */,
+				752C262C20BDD7A000959877 /* miramar_zNeg.png in Resources */,
+				752C261820BDD7A000959877 /* lights_s.png in Resources */,
+				752C263B20BDD7A000959877 /* austriaLDR_SPEC_zPos.png in Resources */,
+				752C263D20BDD7A000959877 /* CrappySunset_SKY_xPos.png in Resources */,
+				752C263320BDD7A000959877 /* austriaLDR_SPEC_xPos.png in Resources */,
+				752C261220BDD7A000959877 /* moped_glow.png in Resources */,
+				752C262620BDD7A000959877 /* CrappySunset_DIFF_zPos.png in Resources */,
+				752C262E20BDD7A000959877 /* CrappySunset_DIFF_xPos.png in Resources */,
+				752C262520BDD7A000959877 /* miramar_zPos.png in Resources */,
+				752C264220BDD7A000959877 /* austriaLDR_DIFF_yNeg.png in Resources */,
+				752C261720BDD7A000959877 /* lights_glow.png in Resources */,
+				752C261A20BDD7A000959877 /* turntable_n.png in Resources */,
+				752C263E20BDD7A000959877 /* miramar_yNeg.png in Resources */,
+				752C264520BDD7A000959877 /* CrappySunset_SKY_zPos.png in Resources */,
+				752C264320BDD7A000959877 /* miramar_yPos.png in Resources */,
 				752C25C720B5F5C100959877 /* house_obj.obj in Resources */,
+				752C263F20BDD7A000959877 /* austriaLDR_DIFF_yPos.png in Resources */,
 				752C25C620B5F5C100959877 /* Turntable.obj in Resources */,
+				752C263C20BDD7A000959877 /* CrappySunset_SKY_zNeg.png in Resources */,
 				752C25D120B90BBB00959877 /* Farmhouse.obj in Resources */,
+				752C261C20BDD7A000959877 /* CrappySunset_SPEC_yNeg.png in Resources */,
+				752C262320BDD7A000959877 /* CrappySunset_DIFF_xNeg.png in Resources */,
+				752C263120BDD7A000959877 /* austriaLDR_SKY_xNeg.png in Resources */,
+				752C262D20BDD7A000959877 /* austriaLDR_DIFF_xNeg.png in Resources */,
+				752C264420BDD7A000959877 /* CrappySunset_SKY_xNeg.png in Resources */,
+				752C261320BDD7A000959877 /* moped_s.png in Resources */,
+				752C262720BDD7A000959877 /* austriaLDR_DIFF_zNeg.png in Resources */,
+				752C262020BDD7A000959877 /* austriaLDR_SPEC_yNeg.png in Resources */,
+				752C263520BDD7A000959877 /* austriaLDR_SKY_zPos.png in Resources */,
 				3A3532CC1E99974500C194AD /* Main.storyboard in Resources */,
+				752C262420BDD7A000959877 /* austriaLDR_DIFF_xPos.png in Resources */,
+				752C264020BDD7A000959877 /* CrappySunset_DIFF_yNeg.png in Resources */,
+				752C263220BDD7A000959877 /* CrappySunset_SPEC_zPos.png in Resources */,
 				752C25C520B5F5C100959877 /* capsule.obj in Resources */,
+				752C263020BDD7A000959877 /* austriaLDR_SPEC_zNeg.png in Resources */,
+				752C264120BDD7A000959877 /* CrappySunset_DIFF_yPos.png in Resources */,
+				752C263420BDD7A000959877 /* CrappySunset_SPEC_xNeg.png in Resources */,
+				752C263620BDD7A000959877 /* austriaLDR_SKY_zNeg.png in Resources */,
+				752C261120BDD7A000959877 /* turntable_d.png in Resources */,
+				752C262B20BDD7A000959877 /* CrappySunset_DIFF_zNeg.png in Resources */,
 				752C25C820B5F5C100959877 /* hull_test_A.obj in Resources */,
+				752C261920BDD7A000959877 /* lights_d.png in Resources */,
+				752C262A20BDD7A000959877 /* austriaLDR_DIFF_zPos.png in Resources */,
+				752C261F20BDD7A000959877 /* austriaLDR_SKY_yPos.png in Resources */,
+				752C261520BDD7A000959877 /* lights_n.png in Resources */,
+				752C263920BDD7A000959877 /* CrappySunset_SPEC_zNeg.png in Resources */,
+				752C261B20BDD7A000959877 /* rainbow.png in Resources */,
+				752C263A20BDD7A000959877 /* austriaLDR_SKY_xPos.png in Resources */,
+				752C262F20BDD7A000959877 /* miramar_xPos.png in Resources */,
+				752C261D20BDD7A000959877 /* austriaLDR_SPEC_yPos.png in Resources */,
+				752C261620BDD7A000959877 /* moped_dhalf.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,9 +536,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 96LKF67VJA;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					TARGET_MACOS,
