@@ -13,8 +13,8 @@ import MetalKit
 class ObjMesh {
 	
 	var meshes: [MTKMesh]
-	let vertexDescriptor = MTLVertexDescriptor()
-	var loader : MTKTextureLoader;
+	let vertexDescriptor : MTLVertexDescriptor
+	var loader : MTKTextureLoader
 	// submesh then texture index
 	var textures: [Int : [Int: MTLTexture]]
 	
@@ -24,28 +24,20 @@ class ObjMesh {
 		}
 	}
 	
-	init(objName : String, device : MTLDevice) {
+	init(objName : String, vd : MTLVertexDescriptor, device : MTLDevice) {
 		
-		// step 2: set up the asset initialization
-		
-		vertexDescriptor.attributes[0].offset = 0
-		vertexDescriptor.attributes[0].format = MTLVertexFormat.float3 // position
-		vertexDescriptor.attributes[1].offset = 12
-		vertexDescriptor.attributes[1].format = MTLVertexFormat.uchar4 // color
-		vertexDescriptor.attributes[2].offset = 16
-		vertexDescriptor.attributes[2].format = MTLVertexFormat.half2 // texture
-		vertexDescriptor.attributes[3].offset = 20
-		vertexDescriptor.attributes[3].format = MTLVertexFormat.float // occlusion
-		vertexDescriptor.layouts[0].stride = 24
+		vertexDescriptor = vd
 		
 		let desc = MTKModelIOVertexDescriptorFromMetal(vertexDescriptor)
 		var attribute = desc.attributes[0] as! MDLVertexAttribute
 		attribute.name = MDLVertexAttributePosition
 		attribute = desc.attributes[1] as! MDLVertexAttribute
-		attribute.name = MDLVertexAttributeColor
+		attribute.name = MDLVertexAttributeNormal
 		attribute = desc.attributes[2] as! MDLVertexAttribute
-		attribute.name = MDLVertexAttributeTextureCoordinate
+		attribute.name = MDLVertexAttributeColor
 		attribute = desc.attributes[3] as! MDLVertexAttribute
+		attribute.name = MDLVertexAttributeTextureCoordinate
+		attribute = desc.attributes[4] as! MDLVertexAttribute
 		attribute.name = MDLVertexAttributeOcclusionValue
 		let mtkBufferAllocator = MTKMeshBufferAllocator(device: device)
 		guard let url = Bundle.main.url(forResource: objName, withExtension: "obj") else {
