@@ -10,6 +10,15 @@ struct Vertex {
 
 struct Uniforms {
     var modelViewProjectionMatrix: matrix_float4x4
+	
+	var lightDirection: vector_float4
+	var timeUniform: vector_float4
+	var sinTime: vector_float4
+	var cosTime: vector_float4
+	var rand01: vector_float4
+	var mainTextureSize: vector_float4
+	var eyeDirection: vector_float4
+
 }
 
 func translationMatrix(_ position: float3) -> matrix_float4x4 {

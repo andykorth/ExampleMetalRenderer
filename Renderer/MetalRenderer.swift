@@ -12,6 +12,13 @@ import MetalKit
 // this seems naughty, but it is quite convenient
 extension String: Error {}
 
+public extension Float {
+	/// Returns a random floating point number between 0.0 and 1.0, inclusive.
+	public static var random: Float {
+		return Float(arc4random()) / 0xFFFFFFFF
+	}
+}
+	
 class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	// The device (aka GPU) we're using to render
@@ -32,7 +39,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var scrollY : Float = 0
 	var zoom : Float = 0
 	
+	let startTime : CFAbsoluteTime
+
 	init(view : MTKView) throws {
+		startTime = CFAbsoluteTimeGetCurrent()
 
 		
 		// perform some initialization here
@@ -148,13 +158,32 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, matrix_multiply(viewMatrix, modelMatrix))
 		
 		// fill uniform buffer:
-		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<matrix_float4x4>.size, options: [])
+		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
 		
-		let mvpMatrix = Uniforms(modelViewProjectionMatrix: modelViewProjectionMatrix)
-		uniformsBuffer.contents().storeBytes(of: mvpMatrix, toByteOffset: 0, as: Uniforms.self)
+		let t = (CFAbsoluteTimeGetCurrent() - startTime) // todo need monotonic time.
 		
+		let s = sin (t / .pi);
+		let c = cos (t / .pi);
+		//Vector3 v = new Vector3 (s, Math.Abs (c * 0.2f) + 0.1f, 0f);
+		var lightDir : vector_float4 = vector_float4(Float(s), 0.3, Float(c), 0);
+		lightDir = normalize(lightDir)
+		
+		let uniforms = Uniforms(
+			modelViewProjectionMatrix: modelViewProjectionMatrix,
+			lightDirection: lightDir,
+			timeUniform: vector_float4(Float(t), Float(t), Float(t), Float(t)),
+			sinTime: vector_float4(Float(sin(t)), Float(sin(t*2)), Float(sin(t*4)), Float(sin(t*8))),
+			cosTime: vector_float4(Float(cos(t)), Float(cos(t*2)), Float(cos(t*4)), Float(cos(t*8))),
+			rand01: vector_float4(Float.random, Float.random, Float.random, Float.random),
+			mainTextureSize: vector_float4(),
+			eyeDirection: vector_float4(scrollX, scrollY, 0, 0)
+		)
+		
+		uniformsBuffer.contents().storeBytes(of: uniforms, toByteOffset: 0, as: Uniforms.self)
+		
+		// Want to send this data to both vertex and fragment shaders.
 		renderCommands.setVertexBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
-
+		renderCommands.setFragmentBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
 	}
 
 	func draw(in view: MTKView) {

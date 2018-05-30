@@ -27,6 +27,15 @@ struct VertexOut {
 
 struct Uniforms {
 	float4x4 modelViewProjectionMatrix;
+	
+	float4 LightDirection;
+	float4 timeUniform;
+	float4 sinTime;
+	float4 cosTime;
+	float4 rand01;
+	float4 mainTextureSize;
+	float4 eyeDirection;
+
 };
 
 
@@ -49,6 +58,7 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 							 uint vertexId [[vertex_id]])
 {
 	float4x4 mvpMatrix = uniforms.modelViewProjectionMatrix;
+	
 	float4 position = vertices.position;
 	
 	VertexOut out;
@@ -67,10 +77,11 @@ fragment half4 fragUV(VertexOut fragments [[stage_in]] ) {
 	return half4(uv.x, uv.y, 0, 1);
 }
 
-fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]] )
+fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]],
+								 constant Uniforms &uniforms [[buffer(1)]] )
 {
 	float2 n = fragments.normals.xy;
-	return half4(n.x, n.y, 0, 1);
+	return half4(n.x, n.y, uniforms.sinTime.x, 1);
 }
 	
 fragment half4 fragDiffuse(VertexOut fragments [[stage_in]],
