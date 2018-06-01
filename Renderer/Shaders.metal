@@ -25,20 +25,6 @@ struct VertexOut {
 	float occlusion;
 };
 
-struct Uniforms {
-	float4x4 modelViewProjectionMatrix;
-	
-	float4 LightDirection;
-	float4 timeUniform;
-	float4 sinTime;
-	float4 cosTime;
-	float4 rand01;
-	float4 mainTextureSize;
-	float4 eyeDirection;
-
-};
-
-
 // Vertex shader outputs and fragment shader inputs
 typedef struct
 {

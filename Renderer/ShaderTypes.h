@@ -1,6 +1,4 @@
-
-#ifndef AAPLShaderTypes_h
-#define AAPLShaderTypes_h
+#pragma once
 
 #include <simd/simd.h>
 
@@ -12,5 +10,19 @@ typedef enum BufferArgumentIndex
     BufferArgumentIndexUniforms     = 1,
 } BufferArgumentIndex;
 
+struct Uniforms {
+	matrix_float4x4 modelViewProjectionMatrix;
+	
+	vector_float4 lightDirection;
+	vector_float4 timeUniform;
+	vector_float4 sinTime;
+	vector_float4 cosTime;
+	vector_float4 rand01;
+	vector_float4 mainTextureSize;
+	vector_float4 eyeDirection;
+};
 
-#endif /* AAPLShaderTypes_h */
+struct Vertex {
+	vector_float4 position;
+	vector_float4 color;
+};
