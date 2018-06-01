@@ -27,6 +27,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var viewportSize : vector_uint2
 	var view : MTKView
 	var objMesh : ObjMesh
+	var cubemapTex : MTLTexture!
 	private let default📚 : MTLLibrary
 	
 	var vertexDescriptor : MTLVertexDescriptor
@@ -90,20 +91,25 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		objMesh.addTexture(name: "turntable_d", index: 0, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_s", index: 1, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_n", index: 2, forSubmesh: 9)
-
+		
 		print("Vertex count: \(objMesh.mesh.vertexCount)")
-		
 		super.init()
-		
+
+		print("Loading cubemaps...")
+		cubemapTex = loadCubemapTexture(name: "austriaLDR_SKY")
 	}
 	
-	func createPipelineState(vertex v : String, fragement frag : String) -> MTLRenderPipelineState {
+	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
+		return createPipelineState(vertex: v, fragment: frag, vertexDescriptor: self.vertexDescriptor)
+	}
+	
+	func createPipelineState(vertex v : String, fragment frag : String, vertexDescriptor vertexDesc : MTLVertexDescriptor ) -> MTLRenderPipelineState {
 		let vertexFunction = default📚.makeFunction(name: v)
 		let fragmentFunction = default📚.makeFunction(name: frag)
 		
 		 // Configure a pipeline descriptor that is used to create a pipeline state
 		 let pipelineDesc : MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor.init()
-		 pipelineDesc.vertexDescriptor = vertexDescriptor
+		 pipelineDesc.vertexDescriptor = vertexDesc
 		 pipelineDesc.vertexFunction = vertexFunction
 		 pipelineDesc.fragmentFunction = fragmentFunction
 		 pipelineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
@@ -139,7 +145,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		// Set the region of the drawable to which we'll draw.
 		renderCommands.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
 		
-		let pipelineState = createPipelineState(vertex: "vertexShader", fragement: "fragmentShader")
+		let pipelineState = createPipelineState(vertex: "vertexShader", fragment: "fragmentShader")
 		renderCommands.setRenderPipelineState(pipelineState)
 		
 		renderCommands.setDepthStencilState(depthStencilState)
@@ -201,14 +207,23 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor!)
 			renderCommands.label = "AndyRenderEncoder";
 			
+			renderCommands.pushDebugGroup(":) Setup Uniforms")
 			self.setupUniforms(renderCommands: renderCommands)
+			renderCommands.popDebugGroup()
+
+			renderCommands.pushDebugGroup(":) Draw Skybox")
+			self.drawSkybox(renderCommands)
+			renderCommands.popDebugGroup()
 			
-			// step 4: set up Metal rendering and drawing of meshes
+			// reset the stencil state to depth testing on.
+			renderCommands.setDepthStencilState(depthStencilState)
 			
 			let vertexBuffer = objMesh.mesh.vertexBuffers[0]
 			renderCommands.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
 			
 			for (submeshIndex, submesh) in  objMesh.mesh.submeshes.enumerated() {
+				renderCommands.pushDebugGroup(":) Draw Submesh \(submeshIndex) named: \(submesh.name)")
+
 //				let submesh = objMesh.mesh.submeshes[submeshIndex]
 				// bind the appropriate textures for the submeshes:
 				
@@ -220,12 +235,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				}
 				
 				if(submeshIndex == 10){
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragement: "fragVertexNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragDiffuseLighting"))
 				}else{
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragement: "fragVertexNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragDiffuseLighting"))
 				}
 
 				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
+				renderCommands.popDebugGroup()
 			}
 			renderCommands.endEncoding()
 			
@@ -237,10 +253,83 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		buffer.commit()
 	}
 	
+	func drawSkybox(_ renderCommands : MTLRenderCommandEncoder){
+		
+		let skyVD = MTLVertexDescriptor()
+
+		// disable depth write:
+		do {
+			let descriptor = MTLDepthStencilDescriptor()
+			descriptor.depthCompareFunction = MTLCompareFunction.always
+			descriptor.isDepthWriteEnabled = false
+			
+			let depthStencilState = device.makeDepthStencilState(descriptor: descriptor)
+			renderCommands.setDepthStencilState(depthStencilState)
+		}
+
+		renderCommands.setFragmentTexture(self.cubemapTex!, at: 0)
+		
+		renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexSkybox", fragment: "fragSkybox", vertexDescriptor: skyVD))
+		renderCommands.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
+		renderCommands.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4)
+	}
+	
 	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
 		// Save the size of the drawable as we'll pass these
 		//   values to our vertex shader when we draw
 		viewportSize.x = UInt32(size.width)
 		viewportSize.y = UInt32(size.height)
+	}
+	
+	func loadCubemapTexture(name texturePrefix : String) -> MTLTexture {
+
+		let loader = MTKTextureLoader(device: device)
+		let bytesPP = 4
+		let size = 512
+		let ROW_BYTES = bytesPP * size
+		let IMAGE_BYTES = ROW_BYTES * size
+
+		do {
+			let cubemapDesc = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: MTLPixelFormat.rgba8Unorm_srgb, size: size, mipmapped: false)
+			let cubemap = device.makeTexture(descriptor: cubemapDesc)
+			
+			let textureLoaderOptions: [String: NSObject]
+			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB") ]
+			
+			let region : MTLRegion = MTLRegion.init(origin: MTLOrigin.init(x: 0, y: 0, z: 0),
+													size: MTLSize.init(width: size, height: size, depth: 1))
+			
+			for (slice) in 0 ... 5
+			{
+				var postfix : String = "invalidSlice"
+				if(slice == 0) { postfix = "xPos" }
+				if(slice == 1) { postfix = "xNeg" }
+				if(slice == 2) { postfix = "yPos" }
+				if(slice == 3) { postfix = "yNeg" }
+				if(slice == 4) { postfix = "zPos" }
+				if(slice == 5) { postfix = "zNeg" }
+				
+				if let file = Bundle.main.path(forResource: "\(texturePrefix)_\(postfix)", ofType: "png") {
+				    let url = URL(fileURLWithPath: file)
+					let data = try Data(contentsOf: url)
+					
+					let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
+					
+					var bunchaData = [UInt8](repeating: 0, count: Int(IMAGE_BYTES))
+					
+					texture.getBytes(&bunchaData, bytesPerRow: ROW_BYTES, from: region, mipmapLevel: 0)
+					
+					cubemap.replace(region: region, mipmapLevel: 0, slice: slice, withBytes: bunchaData, bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
+				}else{
+					print("Missing file: \(texturePrefix)_\(postfix)")
+				}
+				
+			}
+			return cubemap
+		}
+		catch let error {
+			fatalError("\(error)")
+		}
+		
 	}
 }

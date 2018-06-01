@@ -28,7 +28,7 @@ struct VertexOut {
 struct Uniforms {
 	float4x4 modelViewProjectionMatrix;
 	
-	float4 LightDirection;
+	float4 lightDirection;
 	float4 timeUniform;
 	float4 sinTime;
 	float4 cosTime;
@@ -37,7 +37,11 @@ struct Uniforms {
 	float4 eyeDirection;
 
 };
-
+constexpr sampler linearSampler(s_address::repeat,
+								t_address::repeat,
+								mip_filter::linear,
+								mag_filter::linear,
+								min_filter::linear);
 
 // Vertex shader outputs and fragment shader inputs
 typedef struct
@@ -71,6 +75,10 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	return out;
 }
 
+fragment half4 fragRed(VertexOut fragments [[stage_in]] ) {
+	return half4(1, 0, 0, 1);
+}
+
 fragment half4 fragUV(VertexOut fragments [[stage_in]] ) {
 	float2 uv = fragments.texCoords;
 	uv.y = 1 - uv.y;
@@ -88,16 +96,25 @@ fragment half4 fragDiffuse(VertexOut fragments [[stage_in]],
 						   texture2d<float> diffuseTex [[texture(0)]]
 						   )
 {
-	constexpr sampler linearSampler(s_address::repeat,
-									t_address::repeat,
-									mip_filter::linear,
-									mag_filter::linear,
-									min_filter::linear);
-	
 	float2 uv = fragments.texCoords;
 	uv.y = 1 - uv.y;
 	
 	float4 diffuse = diffuseTex.sample(linearSampler, uv);
+	return half4(diffuse);
+}
+
+fragment half4 fragDiffuseLighting(VertexOut fragments [[stage_in]],
+								   texture2d<float> diffuseTex [[texture(0)]],
+								   constant Uniforms &uniforms [[buffer(1)]] )
+{
+	float2 uv = fragments.texCoords;
+	uv.y = 1 - uv.y;
+	
+	float3 lightDir = uniforms.lightDirection.xyz;
+	float normalLightDot = dot(lightDir, fragments.normals.xyz);
+	
+	float dot_product = max(normalLightDot, 0.0);
+	float4 diffuse = float4(dot_product, dot_product, dot_product, 1.0) * diffuseTex.sample(linearSampler, uv);
 	return half4(diffuse);
 }
 
@@ -109,11 +126,6 @@ fragment half4 frag(VertexOut fragments [[stage_in]],
 {
 	float4 baseColor = fragments.color;
 	float4 occlusion = fragments.occlusion;
-	constexpr sampler linearSampler(s_address::repeat,
-									t_address::repeat,
-									mip_filter::linear,
-									mag_filter::linear,
-									min_filter::linear);
 	
 	float2 uv = fragments.texCoords;
 	uv.y = 1 - uv.y;
@@ -130,3 +142,38 @@ fragment half4 frag(VertexOut fragments [[stage_in]],
 	//return half4(spec.a, spec.a, spec.a, 1);
 	return half4(diffuse);// + half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
 }
+
+
+struct SkyboxVertexOut {
+	float4 position [[position]];
+	float4 uv;
+	
+};
+
+vertex SkyboxVertexOut vertexSkybox(uint vertexId [[vertex_id]],
+									constant Uniforms &uniforms [[buffer(1)]],
+									texturecube<float> cubemapSky [[texture(0)]]
+									)
+{
+	const float depth = 0; // depth testing is off while you draw this I hope.
+	const float4 arr[] = {
+		float4(-1, -1, depth, 1),
+		float4(1, -1, depth, 1),
+		float4(-1, 1, depth, 1),
+		float4(1, 1, depth, 1),
+	};
+	SkyboxVertexOut out;
+	out.position = arr[vertexId];
+	out.uv = arr[vertexId];
+
+	return out;
+}
+
+fragment half4 fragSkybox(SkyboxVertexOut fragments [[stage_in]],
+						  constant Uniforms &uniforms [[buffer(1)]],
+						  texturecube<float> cubemapSky [[texture(0)]]
+						  ) {
+	
+	return half4(cubemapSky.sample(linearSampler, fragments.uv.xyz));
+}
+
