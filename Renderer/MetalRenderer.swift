@@ -39,12 +39,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var scrollY : Float = 0
 	var zoom : Float = 0
 	
-	let startTime : CFAbsoluteTime
-
 	init(view : MTKView) throws {
-		startTime = CFAbsoluteTimeGetCurrent()
-
-		
 		// perform some initialization here
 		device = view.device!
 		viewportSize = vector_uint2(0, 0)
@@ -160,7 +155,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		// fill uniform buffer:
 		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
 		
-		let t = (CFAbsoluteTimeGetCurrent() - startTime) // todo need monotonic time.
+		let t = CACurrentMediaTime()
 		
 		let s = sin (t / .pi);
 		let c = cos (t / .pi);
