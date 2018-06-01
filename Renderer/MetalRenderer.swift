@@ -36,8 +36,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	let depthStencilState : MTLDepthStencilState
 	
 	// input:
-	var scrollX : Float = 0
-	var scrollY : Float = 0
+	var scrollX = 0.0
+	var scrollY = 0.0
 	var zoom : Float = 0
 	
 	let startTime : CFAbsoluteTime
@@ -96,7 +96,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		super.init()
 
 		print("Loading cubemaps...")
-		cubemapTex = loadCubemapTexture(name: "austriaLDR_SKY")
+		cubemapTex = loadCubemapTexture(name: "miramar")
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
@@ -130,10 +130,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func mouseDragged(theEvent : NSEvent) {
-		mouseX(Float(theEvent.deltaX), mouseY: Float(theEvent.deltaY))
+		mouseX(Double(theEvent.deltaX), mouseY: Double(theEvent.deltaY))
 	}
 	
-	func mouseX(_ dx : Float, mouseY dy : Float){
+	func mouseX(_ dx : Double, mouseY dy : Double){
 		//print("mouse moved: \(dx), \(dy)")
 		
 		scrollX = (scrollX + dx)//.truncatingRemainder(dividingBy: 360.0)
@@ -145,23 +145,21 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		// Set the region of the drawable to which we'll draw.
 		renderCommands.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
 		
-		let pipelineState = createPipelineState(vertex: "vertexShader", fragment: "fragmentShader")
-		renderCommands.setRenderPipelineState(pipelineState)
-		
 		renderCommands.setDepthStencilState(depthStencilState)
 		renderCommands.setCullMode(.back)
 		renderCommands.setFrontFacing(.counterClockwise)
 		
 		let scaled = scalingMatrix(1)
-		let rotated = matrix_multiply( rotationMatrix(scrollY / -100.0, float3(1, 0, 0)),
-			rotationMatrix(scrollX / -100.0, float3(0, 1, 0)) )
+		let rotated = matrix_multiply( rotationMatrix( Float(scrollY / -100.0), float3(1, 0, 0)),
+			rotationMatrix(  Float(scrollX / -100.0), float3(0, 1, 0)) )
 		let translated = translationMatrix(float3(0, 0, 0))
 		let modelMatrix = matrix_multiply(matrix_multiply(translated, rotated), scaled)
 		let cameraPosition = float3(0, -5, -25 + zoom)
 		let viewMatrix = translationMatrix(cameraPosition)
 		let aspect = Float(viewportSize.x / viewportSize.y)
-		let projMatrix = projectionMatrix(0.1, far: 200, aspect: aspect, fovy: 1)
+		let projMatrix = projectionMatrix(0.1, far: 200, aspect: aspect, fovy: Float(Double.pi / 3.0))
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, matrix_multiply(viewMatrix, modelMatrix))
+		let modelViewProjectionIMatrix = matrix_invert(modelViewProjectionMatrix)
 		
 		// fill uniform buffer:
 		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
@@ -174,15 +172,22 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		var lightDir : vector_float4 = vector_float4(Float(s), 0.3, Float(c), 0);
 		lightDir = normalize(lightDir)
 		
+		var eyeDir = vector_float4( Float(cos(scrollX * Double.pi / 2.0) * sin(scrollY * Double.pi / 2.0)),
+									Float(cos(scrollY * Double.pi / 2.0)),
+									Float(sin(scrollX * Double.pi / 2.0) * sin(-scrollY * Double.pi / 2.0)),
+									1) // * cameraPos.z;
+		eyeDir = normalize(eyeDir)
+
 		let uniforms = Uniforms(
 			modelViewProjectionMatrix: modelViewProjectionMatrix,
+			modelViewProjectionIMatrix: modelViewProjectionIMatrix,
 			lightDirection: lightDir,
 			timeUniform: vector_float4(Float(t), Float(t), Float(t), Float(t)),
 			sinTime: vector_float4(Float(sin(t)), Float(sin(t*2)), Float(sin(t*4)), Float(sin(t*8))),
 			cosTime: vector_float4(Float(cos(t)), Float(cos(t*2)), Float(cos(t*4)), Float(cos(t*8))),
 			rand01: vector_float4(Float.random, Float.random, Float.random, Float.random),
 			mainTextureSize: vector_float4(),
-			eyeDirection: vector_float4(scrollX, scrollY, 0, 0)
+			eyeDirection: eyeDir
 		)
 		
 		uniformsBuffer.contents().storeBytes(of: uniforms, toByteOffset: 0, as: Uniforms.self)
@@ -290,12 +295,12 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 
 		let loader = MTKTextureLoader(device: device)
 		let bytesPP = 4
-		let size = 512
+		let size = 1024
 		let ROW_BYTES = bytesPP * size
 		let IMAGE_BYTES = ROW_BYTES * size
 
 		do {
-			let cubemapDesc = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: MTLPixelFormat.rgba8Unorm_srgb, size: size, mipmapped: false)
+			let cubemapDesc = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: MTLPixelFormat.bgra8Unorm, size: size, mipmapped: false)
 			let cubemap = device.makeTexture(descriptor: cubemapDesc)
 			
 			let textureLoaderOptions: [String: NSObject]
@@ -317,6 +322,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				if let file = Bundle.main.path(forResource: "\(texturePrefix)_\(postfix)", ofType: "png") {
 				    let url = URL(fileURLWithPath: file)
 					let data = try Data(contentsOf: url)
+					print("Loading texture: \(url)")
 					
 					let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
 					

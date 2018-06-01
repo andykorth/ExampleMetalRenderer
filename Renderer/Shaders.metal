@@ -27,7 +27,8 @@ struct VertexOut {
 
 struct Uniforms {
 	float4x4 modelViewProjectionMatrix;
-	
+	float4x4 modelViewProjectionIMatrix;
+
 	float4 lightDirection;
 	float4 timeUniform;
 	float4 sinTime;
@@ -35,6 +36,7 @@ struct Uniforms {
 	float4 rand01;
 	float4 mainTextureSize;
 	float4 eyeDirection;
+	
 
 };
 constexpr sampler linearSampler(s_address::repeat,
@@ -147,6 +149,7 @@ fragment half4 frag(VertexOut fragments [[stage_in]],
 struct SkyboxVertexOut {
 	float4 position [[position]];
 	float4 uv;
+	float3 eyeDirection;
 	
 };
 
@@ -155,7 +158,7 @@ vertex SkyboxVertexOut vertexSkybox(uint vertexId [[vertex_id]],
 									texturecube<float> cubemapSky [[texture(0)]]
 									)
 {
-	const float depth = 0; // depth testing is off while you draw this I hope.
+	const float depth = 1/400.0; // depth testing is off while you draw this I hope.
 	const float4 arr[] = {
 		float4(-1, -1, depth, 1),
 		float4(1, -1, depth, 1),
@@ -165,15 +168,23 @@ vertex SkyboxVertexOut vertexSkybox(uint vertexId [[vertex_id]],
 	SkyboxVertexOut out;
 	out.position = arr[vertexId];
 	out.uv = arr[vertexId];
+	float4 pos = float4(out.position.x, out.position.y, out.position.z, 0);
+	
+	float4 nearPlane = uniforms.modelViewProjectionIMatrix * float4(pos.x, pos.y, 0, 1);
+	float4 farPlane = uniforms.modelViewProjectionIMatrix * float4(pos.x, pos.y, 1, 1);
+	nearPlane /= nearPlane.w;
+	farPlane /= farPlane.w;
 
+	out.eyeDirection = (farPlane -nearPlane ).xyz;
+	
 	return out;
 }
 
-fragment half4 fragSkybox(SkyboxVertexOut fragments [[stage_in]],
+fragment half4 fragSkybox(SkyboxVertexOut in [[stage_in]],
 						  constant Uniforms &uniforms [[buffer(1)]],
 						  texturecube<float> cubemapSky [[texture(0)]]
 						  ) {
 	
-	return half4(cubemapSky.sample(linearSampler, fragments.uv.xyz));
+	return half4(cubemapSky.sample(linearSampler, in.eyeDirection ));
 }
 
