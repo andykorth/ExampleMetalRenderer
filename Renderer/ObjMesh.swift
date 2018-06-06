@@ -56,19 +56,15 @@ class ObjMesh {
 //		mesh.generateAmbientOcclusionVertexColors(withQuality: 1, attenuationFactor: 0.98, objectsToConsider: [mesh], vertexAttributeNamed: MDLVertexAttributeOcclusionValue)
 		print("Generating mesh from : \(asset) was \(mesh)")
 		do {
-			let v = try MTKMesh.newMeshes(asset: asset, device: device)
-			meshes = v.metalKitMeshes
-
-//			meshes = try MTKMesh.newMeshes(asset: asset, device: device)
+			meshes = try MTKMesh.newMeshes(from: asset, device: device, sourceMeshes: nil)
 		}
 		catch let error {
 			fatalError("\(error)")
 		}
 		
-		var i : Int = 0
-		for submesh in meshes.first!.submeshes {
-			print("     Submesh \(i) was named \(submesh.name)")
-			i += 1
+		let submeshes = meshes.first!.submeshes
+		for i in 0..<submeshes.count {
+			print("     Submesh \(i) was named \(submeshes[i].name)")
 		}
 		
 		textures = [0: [Int:MTLTexture]()]

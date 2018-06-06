@@ -27,22 +27,6 @@ struct VertexOut {
 
 };
 
-struct Uniforms {
-	float4x4 MVP_Matrix;
-	float4x4 MVP_i_Matrix;
-	float4x4 MV_Matrix;
-	float4x4 normal_Matrix; // http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
-
-	float4 lightDirection;
-	float4 timeUniform;
-	float4 sinTime;
-	float4 cosTime;
-	float4 rand01;
-	float4 mainTextureSize;
-	float4 eyeDirection;
-	
-
-};
 constexpr sampler linearSampler(s_address::repeat,
 								t_address::repeat,
 								mip_filter::linear,
