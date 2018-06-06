@@ -23,11 +23,15 @@ struct VertexOut {
 	float4 color;
 	float2 texCoords;
 	float occlusion;
+	float4 eyeDirection;
+
 };
 
 struct Uniforms {
-	float4x4 modelViewProjectionMatrix;
-	float4x4 modelViewProjectionIMatrix;
+	float4x4 MVP_Matrix;
+	float4x4 MVP_i_Matrix;
+	float4x4 MV_Matrix;
+	float4x4 normal_Matrix; // http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
 
 	float4 lightDirection;
 	float4 timeUniform;
@@ -63,7 +67,7 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 							 constant Uniforms &uniforms [[buffer(1)]],
 							 uint vertexId [[vertex_id]])
 {
-	float4x4 mvpMatrix = uniforms.modelViewProjectionMatrix;
+	float4x4 mvpMatrix = uniforms.MVP_Matrix;
 	
 	float4 position = vertices.position;
 	
@@ -73,6 +77,11 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	out.texCoords = vertices.texCoords;
 	out.occlusion = vertices.occlusion;
 	out.normals = vertices.normals;
+
+	float3 pos = (uniforms.MV_Matrix * float4(position.xyz, 0) ).xyz;
+	float3 norm = normalize(uniforms.normal_Matrix * float4(out.normals.xyz, 1)).xyz;
+
+	out.eyeDirection = float4(reflect( pos, norm ), 1);
 	
 	return out;
 }
@@ -90,13 +99,19 @@ fragment half4 fragUV(VertexOut fragments [[stage_in]] ) {
 fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]],
 								 constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float2 n = fragments.normals.xy;
-	return half4(n.x, n.y, uniforms.sinTime.x, 1);
+	float3 n = fragments.normals.xyz;
+	return half4(n.x, n.y, n.z, 1);
 }
-	
+
+fragment half4 fragEyeNormals(VertexOut fragments [[stage_in]],
+								 constant Uniforms &uniforms [[buffer(1)]] )
+{
+	float2 n = fragments.eyeDirection.xy;
+	return half4(n.x, n.y, 0, 1);
+}
+
 fragment half4 fragDiffuse(VertexOut fragments [[stage_in]],
-						   texture2d<float> diffuseTex [[texture(0)]]
-						   )
+						   texture2d<float> diffuseTex [[texture(0)]] )
 {
 	float2 uv = fragments.texCoords;
 	uv.y = 1 - uv.y;
@@ -170,8 +185,8 @@ vertex SkyboxVertexOut vertexSkybox(uint vertexId [[vertex_id]],
 	out.uv = arr[vertexId];
 	float4 pos = float4(out.position.x, out.position.y, out.position.z, 0);
 	
-	float4 nearPlane = uniforms.modelViewProjectionIMatrix * float4(pos.x, pos.y, 0, 1);
-	float4 farPlane = uniforms.modelViewProjectionIMatrix * float4(pos.x, pos.y, 1, 1);
+	float4 nearPlane = uniforms.MVP_i_Matrix * float4(pos.x, pos.y, 0, 1);
+	float4 farPlane = uniforms.MVP_i_Matrix * float4(pos.x, pos.y, 1, 1);
 	nearPlane /= nearPlane.w;
 	farPlane /= farPlane.w;
 

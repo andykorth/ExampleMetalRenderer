@@ -9,8 +9,10 @@ struct Vertex {
 }
 
 struct Uniforms {
-	var modelViewProjectionMatrix: matrix_float4x4
-	var modelViewProjectionIMatrix: matrix_float4x4
+	var MVP_Matrix: matrix_float4x4
+	var MVP_i_Matrix: matrix_float4x4
+	var MV_Matrix: matrix_float4x4
+	var normal_Matrix : matrix_float4x4
 
 	var lightDirection: vector_float4
 	var timeUniform: vector_float4

@@ -158,8 +158,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let viewMatrix = translationMatrix(cameraPosition)
 		let aspect = Float(viewportSize.x / viewportSize.y)
 		let projMatrix = projectionMatrix(0.1, far: 200, aspect: aspect, fovy: Float(Double.pi / 3.0))
-		let modelViewProjectionMatrix = matrix_multiply(projMatrix, matrix_multiply(viewMatrix, modelMatrix))
+	
+		let modelViewMatrix = matrix_multiply(viewMatrix, modelMatrix)
+		let modelViewProjectionMatrix = matrix_multiply(projMatrix, modelViewMatrix)
 		let modelViewProjectionIMatrix = matrix_invert(modelViewProjectionMatrix)
+		let normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
 		
 		// fill uniform buffer:
 		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
@@ -179,8 +182,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		eyeDir = normalize(eyeDir)
 
 		let uniforms = Uniforms(
-			modelViewProjectionMatrix: modelViewProjectionMatrix,
-			modelViewProjectionIMatrix: modelViewProjectionIMatrix,
+			MVP_Matrix: modelViewProjectionMatrix,
+			MVP_i_Matrix: modelViewProjectionIMatrix,
+			MV_Matrix: modelViewMatrix,
+			normal_Matrix: normalMatrix,
 			lightDirection: lightDir,
 			timeUniform: vector_float4(Float(t), Float(t), Float(t), Float(t)),
 			sinTime: vector_float4(Float(sin(t)), Float(sin(t*2)), Float(sin(t*4)), Float(sin(t*8))),
@@ -241,13 +246,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				
 				if(submeshIndex == 10){
 					// main moped mesh:
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragDiffuseLighting"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
 				}else if(submeshIndex == 9){
 					// mesh for turntable
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragDiffuseLighting"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
 				}else{
 					// mirrors, headlights, etc.
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragRed"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
 				}
 
 				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
