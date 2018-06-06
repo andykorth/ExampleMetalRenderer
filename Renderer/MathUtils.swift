@@ -3,26 +3,6 @@ import simd
 import Foundation
 import MetalKit
 
-struct Vertex {
-    var position: vector_float4
-    var color: vector_float4
-}
-
-struct Uniforms {
-	var MVP_Matrix: matrix_float4x4
-	var MVP_i_Matrix: matrix_float4x4
-	var MV_Matrix: matrix_float4x4
-	var normal_Matrix : matrix_float4x4
-
-	var lightDirection: vector_float4
-	var timeUniform: vector_float4
-	var sinTime: vector_float4
-	var cosTime: vector_float4
-	var rand01: vector_float4
-	var mainTextureSize: vector_float4
-	var eyeDirection: vector_float4
-}
-
 func translationMatrix(_ position: float3) -> matrix_float4x4 {
     let X = vector_float4(1, 0, 0, 0)
     let Y = vector_float4(0, 1, 0, 0)
