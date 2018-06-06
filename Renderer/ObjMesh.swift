@@ -70,6 +70,10 @@ class ObjMesh {
 		textures = [0: [Int:MTLTexture]()]
 	}
 	
+	func addCubemapTexture(_ texture : MTLTexture, index texIndex : Int, forSubmesh submesh : Int){
+		textures[submesh]![texIndex] = texture;
+	}
+	
 	func addTexture(name objName : String, index texIndex : Int, forSubmesh submesh : Int){
 		guard let file = Bundle.main.path(forResource: objName, ofType: "png") else {
 			fatalError("Resource not found.")

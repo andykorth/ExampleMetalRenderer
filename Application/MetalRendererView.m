@@ -25,5 +25,13 @@
 	[renderer mtkView:self drawableSizeWillChange:size];
 }
 
+- (void) keyDown:(NSEvent *)event
+{
+	[renderer keyDownWithTheEvent:event];
+}
+
+- (BOOL)acceptsFirstResponder {return YES;}
+- (BOOL)canBecomeKeyView {return YES;}
+
 
 @end

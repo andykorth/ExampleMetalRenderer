@@ -23,8 +23,9 @@ struct VertexOut {
 	float4 color;
 	float2 texCoords;
 	float occlusion;
-	float4 eyeDirection;
-
+	float4 eyeDir;
+	float4 eyeSurfaceDirection;
+	float3 reflectDir;
 };
 
 constexpr sampler linearSampler(s_address::repeat,
@@ -62,8 +63,12 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	out.occlusion = vertices.occlusion;
 	out.normals = vertices.normals;
 
+	float4 norm = (uniforms.normal_Matrix * float4(vertices.normals.xyz, 0));
 	float3 pos = (uniforms.MV_Matrix * float4(position.xyz, 0) ).xyz;
-	out.eyeDirection = uniforms.normal_Matrix * float4(out.normals.xyz, 0);
+	out.eyeDir = uniforms.normal_Matrix * float4(out.normals.xyz, 0);
+	out.eyeSurfaceDirection = uniforms.normal_Matrix * float4(pos, 0);
+	
+	out.reflectDir = (uniforms.MV_i_Matrix * reflect( out.eyeSurfaceDirection, norm )).xyz;
 	
 	return out;
 }
@@ -86,11 +91,35 @@ fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]],
 }
 
 fragment half4 fragEyeNormals(VertexOut fragments [[stage_in]],
-								 constant Uniforms &uniforms [[buffer(1)]] )
+							  constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float3 n = normalize(fragments.eyeDirection.xyz);
+	float3 n = normalize(fragments.eyeDir.xyz);
 	return half4(n.x, n.y, n.z, 1);
 }
+
+fragment half4 fragSampleCubemap(VertexOut fragments [[stage_in]],
+								  constant Uniforms &uniforms [[buffer(1)]],
+								  texturecube<float> cubemapSky [[texture(3)]] )
+{
+	float3 n = normalize(fragments.eyeDir.xyz);
+	return half4(cubemapSky.sample(linearSampler, n));
+}
+fragment half4 fragSampleCubemapReflection(VertexOut fragments [[stage_in]],
+								 constant Uniforms &uniforms [[buffer(1)]],
+								 texturecube<float> cubemapSky [[texture(3)]] )
+{
+	float3 n = normalize(fragments.eyeDir.xyz);
+	return half4(n.x, n.y, n.z, 1);
+}
+
+fragment half4 fragPureReflection(VertexOut fragments [[stage_in]],
+								  constant Uniforms &uniforms [[buffer(1)]],
+								  texturecube<float> cubemapSky [[texture(3)]] )
+{
+	float3 n = normalize(fragments.reflectDir.xyz);
+	return half4(cubemapSky.sample(linearSampler, n));
+}
+
 
 fragment half4 fragDiffuse(VertexOut fragments [[stage_in]],
 						   texture2d<float> diffuseTex [[texture(0)]] )

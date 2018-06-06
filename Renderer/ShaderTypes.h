@@ -14,7 +14,8 @@ struct Uniforms {
 	matrix_float4x4 MVP_Matrix;
 	matrix_float4x4 MVP_i_Matrix;
 	matrix_float4x4 MV_Matrix;
-	matrix_float4x4 normal_Matrix; // http://www.lighthouse3d.com/tutorials/glsl-tutorial/the-normal-matrix/
+	matrix_float4x4 MV_i_Matrix;
+	matrix_float4x4 normal_Matrix; // http://www.lighthouse3d.com/tutorials/glsl-12-tutorial/the-normal-matrix/
 
 	vector_float4 lightDirection;
 	vector_float4 timeUniform;

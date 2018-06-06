@@ -28,6 +28,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var view : MTKView
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
+	var selectedShader = "fragPureReflection"
 	private let default📚 : MTLLibrary
 	
 	var vertexDescriptor : MTLVertexDescriptor
@@ -79,6 +80,15 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		
 		print("Loading obj file...")
 		objMesh = ObjMesh.init(objName: "Turntable", vd: vertexDescriptor, device: device)
+
+		print("Vertex count: \(objMesh.mesh.vertexCount)")
+		
+		super.init()
+		
+		print("Loading cubemaps...")
+		cubemapTex = loadCubemapTexture(name: "miramar")
+		
+		print("Loading other textures...")
 		objMesh.addTexture(name: "moped_d", index: 0, forSubmesh: 10)
 		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
 		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
@@ -87,11 +97,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		objMesh.addTexture(name: "turntable_s", index: 1, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_n", index: 2, forSubmesh: 9)
 		
-		print("Vertex count: \(objMesh.mesh.vertexCount)")
-		super.init()
+		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 9)
+		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
 
-		print("Loading cubemaps...")
-		cubemapTex = loadCubemapTexture(name: "miramar")
+
+	
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
@@ -124,15 +134,35 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		}
 	}
 	
+	func keyDown(theEvent : NSEvent) {
+		print("Key down: \(theEvent.keyCode)")
+		
+		
+		if let chars : String = theEvent.characters {
+			let charVal = Int(UnicodeScalar(chars)!.value)
+
+			let a = Int(UnicodeScalar("a").value)
+			let z = Int(UnicodeScalar("z").value)
+
+			let arr = ["fragRed", "fragUV", "fragVertexNormals", "fragEyeNormals", "fragSampleCubemap", "fragSampleCubemapReflection", "fragPureReflection"]
+
+			if charVal >= a && charVal <= z {
+				
+				let index = charVal - a
+				print("Switch shader to: \(index)  -  \(arr[index])")
+				selectedShader = arr[index]
+			}
+		}
+	}
+	
 	func mouseDragged(theEvent : NSEvent) {
 		mouseX(Double(theEvent.deltaX), mouseY: Double(theEvent.deltaY))
 	}
 	
 	func mouseX(_ dx : Double, mouseY dy : Double){
 		//print("mouse moved: \(dx), \(dy)")
-		
-		scrollX = (scrollX + dx)//.truncatingRemainder(dividingBy: 360.0)
-		scrollY = (scrollY + dy)//.truncatingRemainder(dividingBy: 360.0)
+		scrollX = scrollX + dx
+		scrollY = scrollY + dy
 	}
 	
 	func setupUniforms(renderCommands : MTLRenderCommandEncoder){
@@ -156,7 +186,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 		let modelViewMatrix = matrix_multiply(viewMatrix, modelMatrix)
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, modelViewMatrix)
-		let modelViewProjectionIMatrix = matrix_invert(modelViewProjectionMatrix)
 		let normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
 		
 		// fill uniform buffer:
@@ -178,8 +207,9 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 
 		let uniforms = Uniforms(
 			MVP_Matrix: modelViewProjectionMatrix,
-			MVP_i_Matrix: modelViewProjectionIMatrix,
+			MVP_i_Matrix: matrix_invert(modelViewProjectionMatrix),
 			MV_Matrix: modelViewMatrix,
+			MV_i_Matrix: matrix_invert(modelViewMatrix),
 			normal_Matrix: normalMatrix,
 			lightDirection: lightDir,
 			timeUniform: vector_float4(Float(t), Float(t), Float(t), Float(t)),
@@ -241,13 +271,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				
 				if(submeshIndex == 10){
 					// main moped mesh:
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
 				}else if(submeshIndex == 9){
 					// mesh for turntable
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
 				}else{
 					// mirrors, headlights, etc.
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
 				}
 
 				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)

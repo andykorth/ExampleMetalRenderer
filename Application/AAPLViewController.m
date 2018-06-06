@@ -46,5 +46,4 @@ Implementation of our cross-platform view controller
 }
 
 
-
 @end
