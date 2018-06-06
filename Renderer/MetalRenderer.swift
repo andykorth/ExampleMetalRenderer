@@ -246,13 +246,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				
 				if(submeshIndex == 10){
 					// main moped mesh:
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
 				}else if(submeshIndex == 9){
 					// mesh for turntable
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
 				}else{
 					// mirrors, headlights, etc.
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragVertexNormals"))
+					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragEyeNormals"))
 				}
 
 				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)

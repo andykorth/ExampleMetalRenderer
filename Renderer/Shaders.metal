@@ -79,9 +79,7 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	out.normals = vertices.normals;
 
 	float3 pos = (uniforms.MV_Matrix * float4(position.xyz, 0) ).xyz;
-	float3 norm = normalize(uniforms.normal_Matrix * float4(out.normals.xyz, 1)).xyz;
-
-	out.eyeDirection = float4(reflect( pos, norm ), 1);
+	out.eyeDirection = uniforms.normal_Matrix * float4(out.normals.xyz, 0);
 	
 	return out;
 }
@@ -106,8 +104,8 @@ fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]],
 fragment half4 fragEyeNormals(VertexOut fragments [[stage_in]],
 								 constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float2 n = fragments.eyeDirection.xy;
-	return half4(n.x, n.y, 0, 1);
+	float3 n = normalize(fragments.eyeDirection.xyz);
+	return half4(n.x, n.y, n.z, 1);
 }
 
 fragment half4 fragDiffuse(VertexOut fragments [[stage_in]],
