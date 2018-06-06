@@ -26,6 +26,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var commandQueue : MTLCommandQueue
 	var viewportSize : vector_uint2
 	var view : MTKView
+	var colorBuffer : MTLTexture?
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
 	var selectedShader = "fragPureReflection"
@@ -234,12 +235,22 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		buffer.label = "Andy-Commands"
 		
 		// Obtain a renderPassDescriptor generated from the view's drawable textures
-		let renderPassDescriptor = view.currentRenderPassDescriptor;
+		let viewDesc = view.currentRenderPassDescriptor!;
+		let passDesc = MTLRenderPassDescriptor.init();
 		
-		if(renderPassDescriptor != nil)
-		{
+		let colorDesc = MTLRenderPassColorAttachmentDescriptor.init();
+		colorDesc.texture = colorBuffer;
+		colorDesc.loadAction = MTLLoadAction.clear
+		colorDesc.storeAction = MTLStoreAction.store
+		colorDesc.clearColor = MTLClearColor(red: 1, green: 0, blue: 1, alpha: 0)
+		
+		passDesc.colorAttachments[0] = colorDesc
+		passDesc.depthAttachment = viewDesc.depthAttachment
+		passDesc.stencilAttachment = viewDesc.stencilAttachment
+		
+		do {
 			// Create a render command encoder so we can render into something
-			let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor!)
+			let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: passDesc)
 			renderCommands.label = "AndyRenderEncoder";
 			
 			renderCommands.pushDebugGroup(":) Setup Uniforms")
@@ -285,6 +296,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			}
 			renderCommands.endEncoding()
 			
+			let blit = buffer.makeRenderCommandEncoder(descriptor: viewDesc)
+			blit.setFragmentTexture(colorBuffer, at: 0)
+			blit.setRenderPipelineState(createPipelineState(vertex: "vertBlit", fragment: "fragBlit", vertexDescriptor: MTLVertexDescriptor()))
+			blit.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
+			blit.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4);
+			blit.endEncoding()
+			
 			// Schedule a present once the framebuffer is complete using the current drawable
 			buffer.present(view.currentDrawable!)
 		}
@@ -319,6 +337,16 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		//   values to our vertex shader when we draw
 		viewportSize.x = UInt32(size.width)
 		viewportSize.y = UInt32(size.height)
+		
+		let desc = MTLTextureDescriptor.texture2DDescriptor(
+			pixelFormat: MTLPixelFormat.bgra8Unorm,
+			width:Int(viewportSize.x),
+			height:Int(viewportSize.y),
+			mipmapped: false
+		)
+		
+		desc.usage = MTLTextureUsage(rawValue:0x5);//MTLTextureUsage.shaderRead | MTLTextureUsage.renderTarget;
+		colorBuffer = device.makeTexture(descriptor:desc)
 	}
 	
 	func loadCubemapTexture(name texturePrefix : String) -> MTLTexture {

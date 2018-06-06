@@ -214,3 +214,35 @@ fragment half4 fragSkybox(SkyboxVertexOut in [[stage_in]],
 	return half4(cubemapSky.sample(linearSampler, in.eyeDirection ));
 }
 
+struct blitVary {
+	float4 position [[position]];
+	float2 uv;
+};
+
+vertex blitVary vertBlit(
+	uint vertexId [[vertex_id]]
+){
+	const float4 clip_quad[] = {
+		{-1, -1, 0, 1},
+		{ 1, -1, 0, 1},
+		{-1,  1, 0, 1},
+		{ 1,  1, 0, 1},
+	};
+	
+	float4 pos = clip_quad[vertexId];
+	
+	blitVary out;
+	out.position = pos;
+	out.uv = 0.5*pos.xy + 0.5;
+	
+	out.position.y = -out.position.y;
+	return out;
+}
+
+fragment half4 fragBlit(
+	blitVary IN [[stage_in]],
+	texture2d<half> texture [[texture(0)]]
+){
+	return texture.sample(linearSampler, IN.uv);
+}
+
