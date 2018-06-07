@@ -25,17 +25,17 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var commandQueue : MTLCommandQueue
 	private let default📚 : MTLLibrary
 	
-	var viewportSize : vector_uint2
+	var viewport = MTLViewport.init()
 	var view : MTKView
 	var offscreenBuffer : MTLTexture?
-	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor.init();
-	var offscreenPassDesc = MTLRenderPassDescriptor.init();
+	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor.init()
+	var offscreenPassDesc = MTLRenderPassDescriptor.init()
 	
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
 	var selectedShader = "fragPureReflection"
 	
-	var vertexDescriptor : MTLVertexDescriptor
+	var vertexDesc : MTLVertexDescriptor
 	
 	// better place to put this?
 	let depthStencilState : MTLDepthStencilState
@@ -48,46 +48,45 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	init(view : MTKView) throws {
 		// perform some initialization here
 		device = view.device!
-		viewportSize = vector_uint2(0, 0)
 		
 		view.clearColor = MTLClearColorMake(0.5, 0.5, 1, 1)
 		view.colorPixelFormat = .bgra8Unorm
-		view.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
+		view.depthStencilPixelFormat = .depth32Float_stencil8
 		self.view = view;
 		
-		offscreenAttachment.loadAction = MTLLoadAction.clear
-		offscreenAttachment.storeAction = MTLStoreAction.store
+		offscreenAttachment.loadAction = .clear
+		offscreenAttachment.storeAction = .store
 		offscreenAttachment.clearColor = MTLClearColor(red: 1, green: 0, blue: 1, alpha: 0)
 		
-		let descriptor = MTLDepthStencilDescriptor()
-		descriptor.depthCompareFunction = MTLCompareFunction.less
-		descriptor.isDepthWriteEnabled = true
-		
-		depthStencilState = device.makeDepthStencilState(descriptor: descriptor)
+		let depthStencilDesc = MTLDepthStencilDescriptor()
+		depthStencilDesc.depthCompareFunction = .less
+		depthStencilDesc.isDepthWriteEnabled = true
+		depthStencilState = device.makeDepthStencilState(descriptor: depthStencilDesc)
 
 		// Load all the shader files with a .metal file extension in the project
 		default📚 = device.newDefaultLibrary()!
 		
 		// sometimes you need a vertex descriptor:
 		// --- "Vertex function has input attributes but no vertex descriptor was set"
-		vertexDescriptor = MTLVertexDescriptor()
-		vertexDescriptor.attributes[0].offset = 0
-		vertexDescriptor.attributes[0].format = MTLVertexFormat.float3 // position
-		vertexDescriptor.attributes[1].offset = 12
-		vertexDescriptor.attributes[1].format = MTLVertexFormat.float3 // normal
-		vertexDescriptor.attributes[2].offset = 12+12
-		vertexDescriptor.attributes[2].format = MTLVertexFormat.uchar4 // color
-		vertexDescriptor.attributes[3].offset = 16+12
-		vertexDescriptor.attributes[3].format = MTLVertexFormat.half2 // texture
-		vertexDescriptor.attributes[4].offset = 20+12
-		vertexDescriptor.attributes[4].format = MTLVertexFormat.float // occlusion
-		vertexDescriptor.layouts[0].stride = 24+12
+		vertexDesc = MTLVertexDescriptor()
+		let attribs = vertexDesc.attributes
+		attribs[0].offset = 0
+		attribs[0].format = .float3 // position
+		attribs[1].offset = 12
+		attribs[1].format = .float3 // normal
+		attribs[2].offset = 12+12
+		attribs[2].format = .uchar4 // color
+		attribs[3].offset = 16+12
+		attribs[3].format = .half2 // texture
+		attribs[4].offset = 20+12
+		attribs[4].format = .float // occlusion
+		vertexDesc.layouts[0].stride = 24+12
 		
 		// Create the command queue
 		commandQueue = device.makeCommandQueue()
 		
 		print("Loading obj file...")
-		objMesh = ObjMesh.init(objName: "Turntable", vd: vertexDescriptor, device: device)
+		objMesh = ObjMesh.init(objName: "Turntable", vd: vertexDesc, device: device)
 
 		print("Vertex count: \(objMesh.mesh.vertexCount)")
 		
@@ -110,7 +109,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
-		return createPipelineState(vertex: v, fragment: frag, vertexDescriptor: self.vertexDescriptor)
+		return createPipelineState(vertex: v, fragment: frag, vertexDescriptor: vertexDesc)
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String, vertexDescriptor vertexDesc : MTLVertexDescriptor ) -> MTLRenderPipelineState {
@@ -171,9 +170,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func setupUniforms(renderCommands : MTLRenderCommandEncoder){
-		// Set the region of the drawable to which we'll draw.
-		renderCommands.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
-		
+		renderCommands.setViewport(viewport)
 		renderCommands.setDepthStencilState(depthStencilState)
 		renderCommands.setCullMode(.back)
 		renderCommands.setFrontFacing(.counterClockwise)
@@ -185,7 +182,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let modelMatrix = matrix_multiply(translated, rotated)
 		let cameraPosition = float3(0, -5, -25 + zoom)
 		let viewMatrix = translationMatrix(cameraPosition)
-		let aspect = Float(viewportSize.x / viewportSize.y)
+		let aspect = Float(viewport.width / viewport.height)
 		let projMatrix = projectionMatrix(0.1, far: 200, aspect: aspect, fovy: Float(Double.pi / 3.0))
 	
 		let modelViewMatrix = matrix_multiply(viewMatrix, modelMatrix)
@@ -322,15 +319,12 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-		// Save the size of the drawable as we'll pass these
-		//   values to our vertex shader when we draw
-		viewportSize.x = UInt32(size.width)
-		viewportSize.y = UInt32(size.height)
+		viewport = MTLViewport.init(originX: 0, originY: 0, width: Double(size.width), height: Double(size.height), znear: -1, zfar: 1)
 		
 		let desc = MTLTextureDescriptor.texture2DDescriptor(
 			pixelFormat: MTLPixelFormat.bgra8Unorm,
-			width:Int(viewportSize.x),
-			height:Int(viewportSize.y),
+			width:Int(size.width),
+			height:Int(size.height),
 			mipmapped: false
 		)
 		
