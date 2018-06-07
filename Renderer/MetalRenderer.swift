@@ -162,8 +162,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	func mouseX(_ dx : Double, mouseY dy : Double){
 		//print("mouse moved: \(dx), \(dy)")
-		scrollX = scrollX + dx
-		scrollY = scrollY + dy
+		scrollX = scrollX + dx * 0.004 // in radians
+		scrollY = scrollY + dy * 0.004
 	}
 	
 	func setupUniforms(renderCommands : MTLRenderCommandEncoder){
@@ -175,11 +175,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		renderCommands.setCullMode(.back)
 		renderCommands.setFrontFacing(.counterClockwise)
 		
-		let scaled = scalingMatrix(1)
-		let rotated = matrix_multiply( rotationMatrix( Float(scrollY / -100.0), float3(1, 0, 0)),
-			rotationMatrix(  Float(scrollX / -100.0), float3(0, 1, 0)) )
+		// scroll x and y in radians.
+		let rotated = matrix_multiply( rotationMatrix( Float(-scrollY), float3(1, 0, 0)),
+			rotationMatrix(  Float(-scrollX), float3(0, 1, 0)) )
 		let translated = translationMatrix(float3(0, 0, 0))
-		let modelMatrix = matrix_multiply(matrix_multiply(translated, rotated), scaled)
+		let modelMatrix = matrix_multiply(translated, rotated)
 		let cameraPosition = float3(0, -5, -25 + zoom)
 		let viewMatrix = translationMatrix(cameraPosition)
 		let aspect = Float(viewportSize.x / viewportSize.y)

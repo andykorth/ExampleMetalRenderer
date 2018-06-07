@@ -24,7 +24,6 @@ struct VertexOut {
 	float2 texCoords;
 	float occlusion;
 	float4 eyeDir;
-	float4 eyeSurfaceDirection;
 	float3 reflectDir;
 };
 
@@ -66,9 +65,8 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	float4 norm = (uniforms.normal_Matrix * float4(vertices.normals.xyz, 0));
 	float3 pos = (uniforms.MV_Matrix * float4(position.xyz, 0) ).xyz;
 	out.eyeDir = uniforms.normal_Matrix * float4(out.normals.xyz, 0);
-	out.eyeSurfaceDirection = uniforms.normal_Matrix * float4(pos, 0);
 	
-	out.reflectDir = (uniforms.MV_i_Matrix * reflect( out.eyeSurfaceDirection, norm )).xyz;
+	out.reflectDir = (uniforms.MV_i_Matrix * reflect( (uniforms.MV_Matrix * float4(position.xyz, 1) ), norm )).xyz;
 	
 	return out;
 }
@@ -108,7 +106,7 @@ fragment half4 fragSampleCubemapReflection(VertexOut fragments [[stage_in]],
 								 constant Uniforms &uniforms [[buffer(1)]],
 								 texturecube<float> cubemapSky [[texture(3)]] )
 {
-	float3 n = normalize(fragments.eyeDir.xyz);
+	float3 n = normalize(fragments.reflectDir.xyz);
 	return half4(n.x, n.y, n.z, 1);
 }
 
