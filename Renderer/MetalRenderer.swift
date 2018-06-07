@@ -20,17 +20,20 @@ public extension Float {
 }
 	
 class MetalRenderer: NSObject, MTKViewDelegate{
-	
 	// The device (aka GPU) we're using to render
 	var device : MTLDevice
 	var commandQueue : MTLCommandQueue
+	private let default📚 : MTLLibrary
+	
 	var viewportSize : vector_uint2
 	var view : MTKView
-	var colorBuffer : MTLTexture?
+	var offscreenBuffer : MTLTexture?
+	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor.init();
+	var offscreenPassDesc = MTLRenderPassDescriptor.init();
+	
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
 	var selectedShader = "fragPureReflection"
-	private let default📚 : MTLLibrary
 	
 	var vertexDescriptor : MTLVertexDescriptor
 	
@@ -51,6 +54,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		view.colorPixelFormat = .bgra8Unorm
 		view.depthStencilPixelFormat = MTLPixelFormat.depth32Float_stencil8
 		self.view = view;
+		
+		offscreenAttachment.loadAction = MTLLoadAction.clear
+		offscreenAttachment.storeAction = MTLStoreAction.store
+		offscreenAttachment.clearColor = MTLClearColor(red: 1, green: 0, blue: 1, alpha: 0)
 		
 		let descriptor = MTLDepthStencilDescriptor()
 		descriptor.depthCompareFunction = MTLCompareFunction.less
@@ -100,9 +107,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 9)
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
-
-
-	
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
@@ -167,7 +171,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func setupUniforms(renderCommands : MTLRenderCommandEncoder){
-		
 		// Set the region of the drawable to which we'll draw.
 		renderCommands.setViewport(MTLViewport.init(originX: 0, originY: 0, width: Double(viewportSize.x), height: Double(viewportSize.y), znear: -1, zfar: 1))
 		
@@ -229,85 +232,71 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 
 	func draw(in view: MTKView) {
-		
 		// Create a new command buffer for each render pass to the current drawable
 		let buffer = commandQueue.makeCommandBuffer()
 		buffer.label = "Andy-Commands"
 		
-		// Obtain a renderPassDescriptor generated from the view's drawable textures
-		let viewDesc = view.currentRenderPassDescriptor!;
-		let passDesc = MTLRenderPassDescriptor.init();
+		let viewDesc = view.currentRenderPassDescriptor!
+		offscreenAttachment.texture = offscreenBuffer
+		offscreenPassDesc.colorAttachments[0] = offscreenAttachment
+		offscreenPassDesc.depthAttachment = viewDesc.depthAttachment
+		offscreenPassDesc.stencilAttachment = viewDesc.stencilAttachment
 		
-		let colorDesc = MTLRenderPassColorAttachmentDescriptor.init();
-		colorDesc.texture = colorBuffer;
-		colorDesc.loadAction = MTLLoadAction.clear
-		colorDesc.storeAction = MTLStoreAction.store
-		colorDesc.clearColor = MTLClearColor(red: 1, green: 0, blue: 1, alpha: 0)
+		// Create a render command encoder so we can render into something
+		let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: offscreenPassDesc)
+		renderCommands.label = "AndyRenderEncoder";
 		
-		passDesc.colorAttachments[0] = colorDesc
-		passDesc.depthAttachment = viewDesc.depthAttachment
-		passDesc.stencilAttachment = viewDesc.stencilAttachment
-		
-		do {
-			// Create a render command encoder so we can render into something
-			let renderCommands : MTLRenderCommandEncoder = buffer.makeRenderCommandEncoder(descriptor: passDesc)
-			renderCommands.label = "AndyRenderEncoder";
-			
-			renderCommands.pushDebugGroup(":) Setup Uniforms")
-			self.setupUniforms(renderCommands: renderCommands)
-			renderCommands.popDebugGroup()
+		renderCommands.pushDebugGroup(":) Setup Uniforms")
+		self.setupUniforms(renderCommands: renderCommands)
+		renderCommands.popDebugGroup()
 
-			renderCommands.pushDebugGroup(":) Draw Skybox")
-			self.drawSkybox(renderCommands)
-			renderCommands.popDebugGroup()
-			
-			// reset the stencil state to depth testing on.
-			renderCommands.setDepthStencilState(depthStencilState)
-			
-			let vertexBuffer = objMesh.mesh.vertexBuffers[0]
-			renderCommands.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
-			
-			for (submeshIndex, submesh) in  objMesh.mesh.submeshes.enumerated() {
-				renderCommands.pushDebugGroup(":) Draw Submesh \(submeshIndex) named: \(submesh.name)")
+		renderCommands.pushDebugGroup(":) Draw Skybox")
+		self.drawSkybox(renderCommands)
+		renderCommands.popDebugGroup()
+		
+		// reset the stencil state to depth testing on.
+		renderCommands.setDepthStencilState(depthStencilState)
+		
+		let vertexBuffer = objMesh.mesh.vertexBuffers[0]
+		renderCommands.setVertexBuffer(vertexBuffer.buffer, offset: vertexBuffer.offset, at: Int(BufferArgumentIndexVertices.rawValue))
+		
+		for (submeshIndex, submesh) in  objMesh.mesh.submeshes.enumerated() {
+			renderCommands.pushDebugGroup(":) Draw Submesh \(submeshIndex) named: \(submesh.name)")
 
 //				let submesh = objMesh.mesh.submeshes[submeshIndex]
-				// bind the appropriate textures for the submeshes:
-				
-				if let submeshArray = objMesh.textures[submeshIndex] {
-					// now val is not nil and the Optional has been unwrapped, so use it
-					for i in 0 ... submeshArray.count {
-						renderCommands.setFragmentTexture(submeshArray[i], at: i)
-					}
+			// bind the appropriate textures for the submeshes:
+			
+			if let submeshArray = objMesh.textures[submeshIndex] {
+				// now val is not nil and the Optional has been unwrapped, so use it
+				for i in 0 ... submeshArray.count {
+					renderCommands.setFragmentTexture(submeshArray[i], at: i)
 				}
-				
-				if(submeshIndex == 10){
-					// main moped mesh:
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
-				}else if(submeshIndex == 9){
-					// mesh for turntable
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
-				}else{
-					// mirrors, headlights, etc.
-					renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
-				}
-
-				renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
-				renderCommands.popDebugGroup()
 			}
-			renderCommands.endEncoding()
 			
-			let blit = buffer.makeRenderCommandEncoder(descriptor: viewDesc)
-			blit.setFragmentTexture(colorBuffer, at: 0)
-			blit.setRenderPipelineState(createPipelineState(vertex: "vertBlit", fragment: "fragBlit", vertexDescriptor: MTLVertexDescriptor()))
-			blit.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
-			blit.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4);
-			blit.endEncoding()
-			
-			// Schedule a present once the framebuffer is complete using the current drawable
-			buffer.present(view.currentDrawable!)
+			if(submeshIndex == 10){
+				// main moped mesh:
+				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
+			}else if(submeshIndex == 9){
+				// mesh for turntable
+				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
+			}else{
+				// mirrors, headlights, etc.
+				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragRed"))
+			}
+
+			renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
+			renderCommands.popDebugGroup()
 		}
+		renderCommands.endEncoding()
 		
-		// Finalize rendering here & push the command buffer to the GPU
+		let blit = buffer.makeRenderCommandEncoder(descriptor: viewDesc)
+		blit.setFragmentTexture(offscreenBuffer, at: 0)
+		blit.setRenderPipelineState(createPipelineState(vertex: "vertBlit", fragment: "fragBlit", vertexDescriptor: MTLVertexDescriptor()))
+		blit.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
+		blit.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4);
+		blit.endEncoding()
+		
+		buffer.present(view.currentDrawable!)
 		buffer.commit()
 	}
 	
@@ -345,8 +334,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			mipmapped: false
 		)
 		
-		desc.usage = MTLTextureUsage(rawValue:0x5);//MTLTextureUsage.shaderRead | MTLTextureUsage.renderTarget;
-		colorBuffer = device.makeTexture(descriptor:desc)
+		desc.usage = [MTLTextureUsage.shaderRead, MTLTextureUsage.renderTarget]
+		offscreenBuffer = device.makeTexture(descriptor:desc)
 	}
 	
 	func loadCubemapTexture(name texturePrefix : String) -> MTLTexture {
