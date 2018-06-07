@@ -22,6 +22,7 @@ Implementation of our cross-platform view controller
     // Set the view to use the default device
     _view = (MetalRendererView *)self.view;
     _view.device = MTLCreateSystemDefaultDevice();
+	_view.preferredFramesPerSecond = 60;
 
     if(!_view.device)
     {

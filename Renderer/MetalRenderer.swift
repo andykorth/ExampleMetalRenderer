@@ -33,7 +33,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
-	var selectedShader = "fragPureReflection"
+	var selectedShader = "fragEyeReflectionVector"
 	
 	var vertexDesc : MTLVertexDescriptor
 	
@@ -148,7 +148,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let a = Int(UnicodeScalar("a").value)
 			let z = Int(UnicodeScalar("z").value)
 
-			let arr = ["fragRed", "fragUV", "fragVertexNormals", "fragEyeNormals", "fragSampleCubemap", "fragSampleCubemapReflection", "fragPureReflection"]
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection"]
 
 			if charVal >= a && charVal <= z {
 				
@@ -187,8 +187,18 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 		let modelViewMatrix = matrix_multiply(viewMatrix, modelMatrix)
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, modelViewMatrix)
-		let normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
-		
+
+		var normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
+		// normal matrix should be a 3x3, so we'll omit the translation.
+		normalMatrix[0, 3] = 0
+		normalMatrix[1, 3] = 0
+		normalMatrix[2, 3] = 0
+		normalMatrix[3, 3] = 0
+
+		normalMatrix[3, 0] = 0
+		normalMatrix[3, 1] = 0
+		normalMatrix[3, 2] = 0
+
 		// fill uniform buffer:
 		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
 		
