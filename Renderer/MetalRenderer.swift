@@ -33,9 +33,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	let offscreenPassDesc = MTLRenderPassDescriptor()
 	let blitState : MTLRenderPipelineState
 	let depthStencilState : MTLDepthStencilState
+	let depthDisabledState : MTLDepthStencilState
 	
 	let objMesh : ObjMesh
-	var cubemapTex : MTLTexture!
+	var cubemapTex : MTLTexture
 	var selectedShader = "fragPureReflection"
 	
 	var vertexDesc : MTLVertexDescriptor
@@ -75,10 +76,19 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			fatalError("Failed to created pipeline state, error \(error)")
 		}
 		
-		let depthStencilDesc = MTLDepthStencilDescriptor()
-		depthStencilDesc.depthCompareFunction = .less
-		depthStencilDesc.isDepthWriteEnabled = true
-		depthStencilState = device.makeDepthStencilState(descriptor: depthStencilDesc)
+		do {
+			let desc = MTLDepthStencilDescriptor()
+			desc.depthCompareFunction = .less
+			desc.isDepthWriteEnabled = true
+			depthStencilState = device.makeDepthStencilState(descriptor: desc)
+		}
+		
+		do {
+			let desc = MTLDepthStencilDescriptor()
+			desc.depthCompareFunction = .always
+			desc.isDepthWriteEnabled = false
+			depthDisabledState = device.makeDepthStencilState(descriptor: desc)
+		}
 
 		cubemapTex = MetalRenderer.loadCubemapTexture(device: device, name: "miramar")
 		
@@ -304,20 +314,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func drawSkybox(_ renderCommands : MTLRenderCommandEncoder){
-		
 		let skyVD = MTLVertexDescriptor()
 
-		// disable depth write:
-		do {
-			let descriptor = MTLDepthStencilDescriptor()
-			descriptor.depthCompareFunction = .always
-			descriptor.isDepthWriteEnabled = false
-			
-			let depthStencilState = device.makeDepthStencilState(descriptor: descriptor)
-			renderCommands.setDepthStencilState(depthStencilState)
-		}
-
-		renderCommands.setFragmentTexture(self.cubemapTex!, at: 0)
+		renderCommands.setDepthStencilState(depthDisabledState)
+		renderCommands.setFragmentTexture(self.cubemapTex, at: 0)
 		
 		renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexSkybox", fragment: "fragSkybox", vertexDescriptor: skyVD))
 		renderCommands.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
