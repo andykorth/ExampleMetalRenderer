@@ -25,11 +25,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var commandQueue : MTLCommandQueue
 	private let default📚 : MTLLibrary
 	
-	var viewport = MTLViewport.init()
+	var viewport = MTLViewport()
 	var view : MTKView
 	var offscreenBuffer : MTLTexture?
-	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor.init()
-	var offscreenPassDesc = MTLRenderPassDescriptor.init()
+	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor()
+	var offscreenPassDesc = MTLRenderPassDescriptor()
 	
 	var objMesh : ObjMesh
 	var cubemapTex : MTLTexture!
@@ -86,7 +86,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		commandQueue = device.makeCommandQueue()
 		
 		print("Loading obj file...")
-		objMesh = ObjMesh.init(objName: "Turntable", vd: vertexDesc, device: device)
+		objMesh = ObjMesh(objName: "Turntable", vd: vertexDesc, device: device)
 
 		print("Vertex count: \(objMesh.mesh.vertexCount)")
 		
@@ -117,7 +117,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let fragmentFunction = default📚.makeFunction(name: frag)
 		
 		 // Configure a pipeline descriptor that is used to create a pipeline state
-		 let pipelineDesc : MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor.init()
+		 let pipelineDesc : MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
 		 pipelineDesc.vertexDescriptor = vertexDesc
 		 pipelineDesc.vertexFunction = vertexFunction
 		 pipelineDesc.fragmentFunction = fragmentFunction
@@ -319,17 +319,17 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-		viewport = MTLViewport.init(originX: 0, originY: 0, width: Double(size.width), height: Double(size.height), znear: -1, zfar: 1)
+		viewport = MTLViewport(originX: 0, originY: 0, width: Double(size.width), height: Double(size.height), znear: -1, zfar: 1)
 		
-		let desc = MTLTextureDescriptor.texture2DDescriptor(
+		let offscreenBufferDesc = MTLTextureDescriptor.texture2DDescriptor(
 			pixelFormat: MTLPixelFormat.bgra8Unorm,
 			width:Int(size.width),
 			height:Int(size.height),
 			mipmapped: false
 		)
 		
-		desc.usage = [MTLTextureUsage.shaderRead, MTLTextureUsage.renderTarget]
-		offscreenBuffer = device.makeTexture(descriptor:desc)
+		offscreenBufferDesc.usage = [MTLTextureUsage.shaderRead, MTLTextureUsage.renderTarget]
+		offscreenBuffer = device.makeTexture(descriptor:offscreenBufferDesc)
 	}
 	
 	func loadCubemapTexture(name texturePrefix : String) -> MTLTexture {
@@ -347,8 +347,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let textureLoaderOptions: [String: NSObject]
 			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB") ]
 			
-			let region : MTLRegion = MTLRegion.init(origin: MTLOrigin.init(x: 0, y: 0, z: 0),
-													size: MTLSize.init(width: size, height: size, depth: 1))
+			let region : MTLRegion = MTLRegion(origin: MTLOrigin(x: 0, y: 0, z: 0),
+													size: MTLSize(width: size, height: size, depth: 1))
 			
 			for (slice) in 0 ... 5
 			{
