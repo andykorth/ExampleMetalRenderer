@@ -164,7 +164,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let a = Int(UnicodeScalar("a").value)
 			let z = Int(UnicodeScalar("z").value)
 
-			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection"]
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection"]
 
 			if charVal >= a && charVal <= z {
 				
