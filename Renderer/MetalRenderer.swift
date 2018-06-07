@@ -25,20 +25,21 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var commandQueue : MTLCommandQueue
 	private let default📚 : MTLLibrary
 	
+	let view : MTKView
 	var viewport = MTLViewport()
-	var view : MTKView
+	let offscreenPixelFormat = MTLPixelFormat.rgba16Float
 	var offscreenBuffer : MTLTexture?
-	var offscreenAttachment = MTLRenderPassColorAttachmentDescriptor()
-	var offscreenPassDesc = MTLRenderPassDescriptor()
+	let offscreenAttachment = MTLRenderPassColorAttachmentDescriptor()
+	let offscreenPassDesc = MTLRenderPassDescriptor()
+	let blitState : MTLRenderPipelineState
+	let depthStencilState : MTLDepthStencilState
+	let depthDisabledState : MTLDepthStencilState
 	
-	var objMesh : ObjMesh
-	var cubemapTex : MTLTexture!
-	var selectedShader = "fragEyeReflectionVector"
+	let objMesh : ObjMesh
+	var cubemapTex : MTLTexture
+	var selectedShader = "fragPureReflection"
 	
 	var vertexDesc : MTLVertexDescriptor
-	
-	// better place to put this?
-	let depthStencilState : MTLDepthStencilState
 	
 	// input:
 	var scrollX = 0.0
@@ -48,6 +49,10 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	init(view : MTKView) throws {
 		// perform some initialization here
 		device = view.device!
+		commandQueue = device.makeCommandQueue()
+		
+		// Load all the shader files with a .metal file extension in the project
+		default📚 = device.newDefaultLibrary()!
 		
 		view.clearColor = MTLClearColorMake(0.5, 0.5, 1, 1)
 		view.colorPixelFormat = .bgra8Unorm
@@ -58,13 +63,34 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		offscreenAttachment.storeAction = .store
 		offscreenAttachment.clearColor = MTLClearColor(red: 1, green: 0, blue: 1, alpha: 0)
 		
-		let depthStencilDesc = MTLDepthStencilDescriptor()
-		depthStencilDesc.depthCompareFunction = .less
-		depthStencilDesc.isDepthWriteEnabled = true
-		depthStencilState = device.makeDepthStencilState(descriptor: depthStencilDesc)
+		do {
+			let blitDesc = MTLRenderPipelineDescriptor()
+			blitDesc.vertexDescriptor = MTLVertexDescriptor()
+			blitDesc.vertexFunction = default📚.makeFunction(name: "vertBlit")
+			blitDesc.fragmentFunction = default📚.makeFunction(name: "fragBlit")
+			blitDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
+			blitDesc.depthAttachmentPixelFormat = view.depthStencilPixelFormat
+			blitDesc.stencilAttachmentPixelFormat = view.depthStencilPixelFormat
+			try blitState = device.makeRenderPipelineState(descriptor: blitDesc)
+		} catch {
+			fatalError("Failed to created pipeline state, error \(error)")
+		}
+		
+		do {
+			let desc = MTLDepthStencilDescriptor()
+			desc.depthCompareFunction = .less
+			desc.isDepthWriteEnabled = true
+			depthStencilState = device.makeDepthStencilState(descriptor: desc)
+		}
+		
+		do {
+			let desc = MTLDepthStencilDescriptor()
+			desc.depthCompareFunction = .always
+			desc.isDepthWriteEnabled = false
+			depthDisabledState = device.makeDepthStencilState(descriptor: desc)
+		}
 
-		// Load all the shader files with a .metal file extension in the project
-		default📚 = device.newDefaultLibrary()!
+		cubemapTex = MetalRenderer.loadCubemapTexture(device: device, name: "miramar")
 		
 		// sometimes you need a vertex descriptor:
 		// --- "Vertex function has input attributes but no vertex descriptor was set"
@@ -82,30 +108,22 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		attribs[4].format = .float // occlusion
 		vertexDesc.layouts[0].stride = 24+12
 		
-		// Create the command queue
-		commandQueue = device.makeCommandQueue()
-		
 		print("Loading obj file...")
 		objMesh = ObjMesh(objName: "Turntable", vd: vertexDesc, device: device)
-
 		print("Vertex count: \(objMesh.mesh.vertexCount)")
-		
-		super.init()
-		
-		print("Loading cubemaps...")
-		cubemapTex = loadCubemapTexture(name: "miramar")
-		
+				
 		print("Loading other textures...")
-		objMesh.addTexture(name: "moped_d", index: 0, forSubmesh: 10)
-		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
-		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
-
 		objMesh.addTexture(name: "turntable_d", index: 0, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_s", index: 1, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_n", index: 2, forSubmesh: 9)
-		
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 9)
+		
+		objMesh.addTexture(name: "moped_d", index: 0, forSubmesh: 10)
+		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
+		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
+		
+		super.init()
 	}
 	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
@@ -117,12 +135,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let fragmentFunction = default📚.makeFunction(name: frag)
 		
 		 // Configure a pipeline descriptor that is used to create a pipeline state
-		 let pipelineDesc : MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
+		 let pipelineDesc = MTLRenderPipelineDescriptor()
 		 pipelineDesc.vertexDescriptor = vertexDesc
 		 pipelineDesc.vertexFunction = vertexFunction
 		 pipelineDesc.fragmentFunction = fragmentFunction
-		 pipelineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
-		
+		 pipelineDesc.colorAttachments[0].pixelFormat = offscreenPixelFormat
 		 pipelineDesc.depthAttachmentPixelFormat = view.depthStencilPixelFormat
 		 pipelineDesc.stencilAttachmentPixelFormat = view.depthStencilPixelFormat
 		
@@ -140,7 +157,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	func keyDown(theEvent : NSEvent) {
 		print("Key down: \(theEvent.keyCode)")
-		
 		
 		if let chars : String = theEvent.characters {
 			let charVal = Int(UnicodeScalar(chars)!.value)
@@ -298,7 +314,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		
 		let blit = buffer.makeRenderCommandEncoder(descriptor: viewDesc)
 		blit.setFragmentTexture(offscreenBuffer, at: 0)
-		blit.setRenderPipelineState(createPipelineState(vertex: "vertBlit", fragment: "fragBlit", vertexDescriptor: MTLVertexDescriptor()))
+		blit.setRenderPipelineState(blitState)
 		blit.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
 		blit.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4);
 		blit.endEncoding()
@@ -308,42 +324,31 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	func drawSkybox(_ renderCommands : MTLRenderCommandEncoder){
-		
 		let skyVD = MTLVertexDescriptor()
 
-		// disable depth write:
-		do {
-			let descriptor = MTLDepthStencilDescriptor()
-			descriptor.depthCompareFunction = MTLCompareFunction.always
-			descriptor.isDepthWriteEnabled = false
-			
-			let depthStencilState = device.makeDepthStencilState(descriptor: descriptor)
-			renderCommands.setDepthStencilState(depthStencilState)
-		}
-
-		renderCommands.setFragmentTexture(self.cubemapTex!, at: 0)
+		renderCommands.setDepthStencilState(depthDisabledState)
+		renderCommands.setFragmentTexture(self.cubemapTex, at: 0)
 		
 		renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexSkybox", fragment: "fragSkybox", vertexDescriptor: skyVD))
 		renderCommands.setVertexBuffer(nil, offset: 0, at: Int(BufferArgumentIndexVertices.rawValue))
-		renderCommands.drawPrimitives(type: MTLPrimitiveType.triangleStrip, vertexStart: 0, vertexCount: 4)
+		renderCommands.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
 	}
 	
 	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
 		viewport = MTLViewport(originX: 0, originY: 0, width: Double(size.width), height: Double(size.height), znear: -1, zfar: 1)
 		
 		let offscreenBufferDesc = MTLTextureDescriptor.texture2DDescriptor(
-			pixelFormat: MTLPixelFormat.bgra8Unorm,
+			pixelFormat: offscreenPixelFormat,
 			width:Int(size.width),
 			height:Int(size.height),
 			mipmapped: false
 		)
 		
-		offscreenBufferDesc.usage = [MTLTextureUsage.shaderRead, MTLTextureUsage.renderTarget]
+		offscreenBufferDesc.usage = [.shaderRead, .renderTarget]
 		offscreenBuffer = device.makeTexture(descriptor:offscreenBufferDesc)
 	}
 	
-	func loadCubemapTexture(name texturePrefix : String) -> MTLTexture {
-
+	static func loadCubemapTexture(device : MTLDevice, name texturePrefix : String) -> MTLTexture {
 		let loader = MTKTextureLoader(device: device)
 		let bytesPP = 4
 		let size = 1024
@@ -360,8 +365,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let region : MTLRegion = MTLRegion(origin: MTLOrigin(x: 0, y: 0, z: 0),
 													size: MTLSize(width: size, height: size, depth: 1))
 			
-			for (slice) in 0 ... 5
-			{
+			for slice in 0 ... 5 {
 				var postfix : String = "invalidSlice"
 				if(slice == 0) { postfix = "xPos" }
 				if(slice == 1) { postfix = "xNeg" }
@@ -382,16 +386,15 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 					texture.getBytes(&bunchaData, bytesPerRow: ROW_BYTES, from: region, mipmapLevel: 0)
 					
 					cubemap.replace(region: region, mipmapLevel: 0, slice: slice, withBytes: bunchaData, bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
-				}else{
+				} else {
 					print("Missing file: \(texturePrefix)_\(postfix)")
 				}
 				
 			}
+			
 			return cubemap
-		}
-		catch let error {
+		} catch let error {
 			fatalError("\(error)")
 		}
-		
 	}
 }
