@@ -199,9 +199,33 @@ fragment half4 fragDiffuseSpecularReflection(VertexOut fragments [[stage_in]],
 	float3 n = normalize(fragments.reflectDir);
 	float4 reflection = cubemapSky.sample(linearSampler, n);
 
-	float4 color = 0.8 * diffuse + specularReflection + reflection * specularColor.a * 0.3;
+	float reflectivity = pow(specularColor.a, 3) * 0.4; //looks about right. asphalt, tires, seat shouldn't reflect much.
+	
+	float4 color = 0.8 * diffuse + specularReflection + reflection * reflectivity;
 
+//	return half4(reflectivity, reflectivity, reflectivity, 1);
 	return half4(color);
+}
+
+fragment half4 fragDiffuseImageLighting(VertexOut fragments [[stage_in]],
+											texture2d<float> diffuseTex [[texture(0)]],
+											texture2d<float> specularTex [[texture(1)]],
+											texturecube<float> cubemapSky [[texture(3)]],
+											texturecube<float> cubemapSpec [[texture(4)]],
+											texturecube<float> cubemapDiffuse [[texture(5)]],
+											constant Uniforms &uniforms [[buffer(1)]] )
+{
+	float2 uv = fragments.texCoords;
+	uv.y = 1 - uv.y;
+	
+	float3 n = normalize(fragments.reflectDir);
+	// renormalize because interpolated normals can get a bit off
+	float3 normal = normalize(fragments.normals.xyz);
+	
+	float4 light = cubemapDiffuse.sample(linearSampler, n);
+	float4 diffuse = light * diffuseTex.sample(linearSampler, uv);
+
+	return half4(diffuse);
 }
 
 

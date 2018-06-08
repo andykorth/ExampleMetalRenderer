@@ -75,6 +75,18 @@
 		752C264320BDD7A000959877 /* miramar_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260D20BDD7A000959877 /* miramar_yPos.png */; };
 		752C264420BDD7A000959877 /* CrappySunset_SKY_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260E20BDD7A000959877 /* CrappySunset_SKY_xNeg.png */; };
 		752C264520BDD7A000959877 /* CrappySunset_SKY_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 752C260F20BDD7A000959877 /* CrappySunset_SKY_zPos.png */; };
+		75DE900D20CB1ED900EC35C6 /* bridge_4k_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900720CB1E8500EC35C6 /* bridge_4k_xNeg.png */; };
+		75DE900E20CB1ED900EC35C6 /* bridge_4k_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900820CB1E8600EC35C6 /* bridge_4k_xPos.png */; };
+		75DE900F20CB1ED900EC35C6 /* bridge_4k_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900920CB1E8900EC35C6 /* bridge_4k_yNeg.png */; };
+		75DE901020CB1ED900EC35C6 /* bridge_4k_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900C20CB1E8B00EC35C6 /* bridge_4k_yPos.png */; };
+		75DE901120CB1ED900EC35C6 /* bridge_4k_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900B20CB1E8B00EC35C6 /* bridge_4k_zNeg.png */; };
+		75DE901220CB1ED900EC35C6 /* bridge_4k_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE900A20CB1E8A00EC35C6 /* bridge_4k_zPos.png */; };
+		75DE901920CB272A00EC35C6 /* bridge_4k_fakeDiff_yNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901320CB272600EC35C6 /* bridge_4k_fakeDiff_yNeg.png */; };
+		75DE901A20CB272A00EC35C6 /* bridge_4k_fakeDiff_zPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901420CB272700EC35C6 /* bridge_4k_fakeDiff_zPos.png */; };
+		75DE901B20CB272A00EC35C6 /* bridge_4k_fakeDiff_zNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901520CB272700EC35C6 /* bridge_4k_fakeDiff_zNeg.png */; };
+		75DE901C20CB272A00EC35C6 /* bridge_4k_fakeDiff_xPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901620CB272800EC35C6 /* bridge_4k_fakeDiff_xPos.png */; };
+		75DE901D20CB272A00EC35C6 /* bridge_4k_fakeDiff_yPos.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901720CB272900EC35C6 /* bridge_4k_fakeDiff_yPos.png */; };
+		75DE901E20CB272A00EC35C6 /* bridge_4k_fakeDiff_xNeg.png in Resources */ = {isa = PBXBuildFile; fileRef = 75DE901820CB272900EC35C6 /* bridge_4k_fakeDiff_xNeg.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -154,6 +166,18 @@
 		752C260D20BDD7A000959877 /* miramar_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = miramar_yPos.png; sourceTree = "<group>"; };
 		752C260E20BDD7A000959877 /* CrappySunset_SKY_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_xNeg.png; sourceTree = "<group>"; };
 		752C260F20BDD7A000959877 /* CrappySunset_SKY_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CrappySunset_SKY_zPos.png; sourceTree = "<group>"; };
+		75DE900720CB1E8500EC35C6 /* bridge_4k_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_xNeg.png; sourceTree = "<group>"; };
+		75DE900820CB1E8600EC35C6 /* bridge_4k_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_xPos.png; sourceTree = "<group>"; };
+		75DE900920CB1E8900EC35C6 /* bridge_4k_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_yNeg.png; sourceTree = "<group>"; };
+		75DE900A20CB1E8A00EC35C6 /* bridge_4k_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_zPos.png; sourceTree = "<group>"; };
+		75DE900B20CB1E8B00EC35C6 /* bridge_4k_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_zNeg.png; sourceTree = "<group>"; };
+		75DE900C20CB1E8B00EC35C6 /* bridge_4k_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_yPos.png; sourceTree = "<group>"; };
+		75DE901320CB272600EC35C6 /* bridge_4k_fakeDiff_yNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_yNeg.png; sourceTree = "<group>"; };
+		75DE901420CB272700EC35C6 /* bridge_4k_fakeDiff_zPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_zPos.png; sourceTree = "<group>"; };
+		75DE901520CB272700EC35C6 /* bridge_4k_fakeDiff_zNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_zNeg.png; sourceTree = "<group>"; };
+		75DE901620CB272800EC35C6 /* bridge_4k_fakeDiff_xPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_xPos.png; sourceTree = "<group>"; };
+		75DE901720CB272900EC35C6 /* bridge_4k_fakeDiff_yPos.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_yPos.png; sourceTree = "<group>"; };
+		75DE901820CB272900EC35C6 /* bridge_4k_fakeDiff_xNeg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bridge_4k_fakeDiff_xNeg.png; sourceTree = "<group>"; };
 		98A53EFB3A5DF1BBA8D07F7C /* SampleCode.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -278,6 +302,12 @@
 		752C25E520BDD79F00959877 /* cubemaps */ = {
 			isa = PBXGroup;
 			children = (
+				75DE900720CB1E8500EC35C6 /* bridge_4k_xNeg.png */,
+				75DE900820CB1E8600EC35C6 /* bridge_4k_xPos.png */,
+				75DE900920CB1E8900EC35C6 /* bridge_4k_yNeg.png */,
+				75DE900C20CB1E8B00EC35C6 /* bridge_4k_yPos.png */,
+				75DE900B20CB1E8B00EC35C6 /* bridge_4k_zNeg.png */,
+				75DE900A20CB1E8A00EC35C6 /* bridge_4k_zPos.png */,
 				752C25E620BDD79F00959877 /* CrappySunset_SPEC_yNeg.png */,
 				752C25E720BDD79F00959877 /* austriaLDR_SPEC_yPos.png */,
 				752C25E820BDD79F00959877 /* austriaLDR_SKY_yNeg.png */,
@@ -305,6 +335,12 @@
 				752C25FE20BDD7A000959877 /* CrappySunset_SPEC_xNeg.png */,
 				752C25FF20BDD7A000959877 /* austriaLDR_SKY_zPos.png */,
 				752C260020BDD7A000959877 /* austriaLDR_SKY_zNeg.png */,
+				75DE901820CB272900EC35C6 /* bridge_4k_fakeDiff_xNeg.png */,
+				75DE901620CB272800EC35C6 /* bridge_4k_fakeDiff_xPos.png */,
+				75DE901320CB272600EC35C6 /* bridge_4k_fakeDiff_yNeg.png */,
+				75DE901720CB272900EC35C6 /* bridge_4k_fakeDiff_yPos.png */,
+				75DE901520CB272700EC35C6 /* bridge_4k_fakeDiff_zNeg.png */,
+				75DE901420CB272700EC35C6 /* bridge_4k_fakeDiff_zPos.png */,
 				752C260120BDD7A000959877 /* CrappySunset_SPEC_xPos.png */,
 				752C260220BDD7A000959877 /* austriaLDR_SPEC_xNeg.png */,
 				752C260320BDD7A000959877 /* CrappySunset_SPEC_zNeg.png */,
@@ -384,9 +420,19 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75DE900D20CB1ED900EC35C6 /* bridge_4k_xNeg.png in Resources */,
+				75DE900E20CB1ED900EC35C6 /* bridge_4k_xPos.png in Resources */,
+				75DE900F20CB1ED900EC35C6 /* bridge_4k_yNeg.png in Resources */,
+				75DE901020CB1ED900EC35C6 /* bridge_4k_yPos.png in Resources */,
+				75DE901120CB1ED900EC35C6 /* bridge_4k_zNeg.png in Resources */,
+				75DE901220CB1ED900EC35C6 /* bridge_4k_zPos.png in Resources */,
+				75DE901B20CB272A00EC35C6 /* bridge_4k_fakeDiff_zNeg.png in Resources */,
 				752C262220BDD7A000959877 /* miramar_xNeg.png in Resources */,
 				752C261020BDD7A000959877 /* turntable_s.png in Resources */,
+				75DE901E20CB272A00EC35C6 /* bridge_4k_fakeDiff_xNeg.png in Resources */,
 				752C261420BDD7A000959877 /* moped_d.png in Resources */,
+				75DE901920CB272A00EC35C6 /* bridge_4k_fakeDiff_yNeg.png in Resources */,
+				75DE901D20CB272A00EC35C6 /* bridge_4k_fakeDiff_yPos.png in Resources */,
 				752C262820BDD7A000959877 /* CrappySunset_SKY_yPos.png in Resources */,
 				752C262120BDD7A000959877 /* CrappySunset_SPEC_yPos.png in Resources */,
 				752C263720BDD7A000959877 /* CrappySunset_SPEC_xPos.png in Resources */,
@@ -396,10 +442,12 @@
 				752C262C20BDD7A000959877 /* miramar_zNeg.png in Resources */,
 				752C261820BDD7A000959877 /* lights_s.png in Resources */,
 				752C263B20BDD7A000959877 /* austriaLDR_SPEC_zPos.png in Resources */,
+				75DE901A20CB272A00EC35C6 /* bridge_4k_fakeDiff_zPos.png in Resources */,
 				752C263D20BDD7A000959877 /* CrappySunset_SKY_xPos.png in Resources */,
 				752C263320BDD7A000959877 /* austriaLDR_SPEC_xPos.png in Resources */,
 				752C261220BDD7A000959877 /* moped_glow.png in Resources */,
 				752C262620BDD7A000959877 /* CrappySunset_DIFF_zPos.png in Resources */,
+				75DE901C20CB272A00EC35C6 /* bridge_4k_fakeDiff_xPos.png in Resources */,
 				752C262E20BDD7A000959877 /* CrappySunset_DIFF_xPos.png in Resources */,
 				752C262520BDD7A000959877 /* miramar_zPos.png in Resources */,
 				752C264220BDD7A000959877 /* austriaLDR_DIFF_yNeg.png in Resources */,

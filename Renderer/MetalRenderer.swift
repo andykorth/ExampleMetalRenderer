@@ -37,6 +37,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	let objMesh : ObjMesh
 	var cubemapTex : MTLTexture
+	var cubemapDiffTex : MTLTexture
+	var cubemapSpecTex : MTLTexture
 	var selectedShader = "fragPureReflection"
 	
 	var vertexDesc : MTLVertexDescriptor
@@ -90,7 +92,9 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			depthDisabledState = device.makeDepthStencilState(descriptor: desc)
 		}
 
-		cubemapTex = MetalRenderer.loadCubemapTexture(device: device, name: "miramar")
+		cubemapTex = MetalRenderer.loadCubemapTexture(device: device, name: "bridge_4k")
+		cubemapDiffTex = MetalRenderer.loadCubemapTexture(device: device, name: "bridge_4k_fakeDiff")
+		cubemapSpecTex = MetalRenderer.loadCubemapTexture(device: device, name: "bridge_4k_fakeDiff")
 		
 		// sometimes you need a vertex descriptor:
 		// --- "Vertex function has input attributes but no vertex descriptor was set"
@@ -117,12 +121,16 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		objMesh.addTexture(name: "turntable_s", index: 1, forSubmesh: 9)
 		objMesh.addTexture(name: "turntable_n", index: 2, forSubmesh: 9)
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 9)
+		objMesh.addCubemapTexture(cubemapSpecTex, index: 4, forSubmesh: 9)
+		objMesh.addCubemapTexture(cubemapDiffTex, index: 5, forSubmesh: 9)
 		
 		objMesh.addTexture(name: "moped_d", index: 0, forSubmesh: 10)
 		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
 		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
-		
+		objMesh.addCubemapTexture(cubemapSpecTex, index: 4, forSubmesh: 10)
+		objMesh.addCubemapTexture(cubemapDiffTex, index: 5, forSubmesh: 10)
+
 		super.init()
 	}
 	
@@ -169,7 +177,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let a = Int(UnicodeScalar("a").value)
 			let z = Int(UnicodeScalar("z").value)
 
-			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection"]
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection", "fragDiffuseImageLighting"]
 
 			if charVal >= a && charVal <= z {
 				
@@ -353,9 +361,41 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	}
 	
 	static func loadCubemapTexture(device : MTLDevice, name texturePrefix : String) -> MTLTexture {
+		
+		let textureLoaderOptions: [String: NSObject]
+		textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB") ]
+		
 		let loader = MTKTextureLoader(device: device)
+		
+		var slices : [MTLTexture] = []
+		for slice in 0 ... 5 {
+			var postfix : String = "invalidSlice"
+			if(slice == 0) { postfix = "xPos" }
+			if(slice == 1) { postfix = "xNeg" }
+			if(slice == 2) { postfix = "yPos" }
+			if(slice == 3) { postfix = "yNeg" }
+			if(slice == 4) { postfix = "zPos" }
+			if(slice == 5) { postfix = "zNeg" }
+			
+			do{
+				if let file = Bundle.main.path(forResource: "\(texturePrefix)_\(postfix)", ofType: "png") {
+					let url = URL(fileURLWithPath: file)
+					let data = try Data(contentsOf: url)
+					print("Loading texture: \(url)")
+					let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
+					
+					slices.append(texture);
+				}
+			} catch let error {
+				fatalError("\(error)")
+			}
+		}
+		
+		precondition(slices.count > 0, "Failed to load any cubemap images")
+		precondition(slices[0].width == slices[0].height, "nonsquare, wtf??")
+
 		let bytesPP = 4
-		let size = 1024
+		let size = slices[0].width
 		let ROW_BYTES = bytesPP * size
 		let IMAGE_BYTES = ROW_BYTES * size
 
@@ -363,37 +403,15 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let cubemapDesc = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: MTLPixelFormat.bgra8Unorm, size: size, mipmapped: false)
 			let cubemap = device.makeTexture(descriptor: cubemapDesc)
 			
-			let textureLoaderOptions: [String: NSObject]
-			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB") ]
 			
 			let region : MTLRegion = MTLRegion(origin: MTLOrigin(x: 0, y: 0, z: 0),
 													size: MTLSize(width: size, height: size, depth: 1))
 			
-			for slice in 0 ... 5 {
-				var postfix : String = "invalidSlice"
-				if(slice == 0) { postfix = "xPos" }
-				if(slice == 1) { postfix = "xNeg" }
-				if(slice == 2) { postfix = "yPos" }
-				if(slice == 3) { postfix = "yNeg" }
-				if(slice == 4) { postfix = "zPos" }
-				if(slice == 5) { postfix = "zNeg" }
+			for (index, texture) in slices.enumerated() {
 				
-				if let file = Bundle.main.path(forResource: "\(texturePrefix)_\(postfix)", ofType: "png") {
-				    let url = URL(fileURLWithPath: file)
-					let data = try Data(contentsOf: url)
-					print("Loading texture: \(url)")
-					
-					let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
-					
-					var bunchaData = [UInt8](repeating: 0, count: Int(IMAGE_BYTES))
-					
-					texture.getBytes(&bunchaData, bytesPerRow: ROW_BYTES, from: region, mipmapLevel: 0)
-					
-					cubemap.replace(region: region, mipmapLevel: 0, slice: slice, withBytes: bunchaData, bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
-				} else {
-					print("Missing file: \(texturePrefix)_\(postfix)")
-				}
-				
+				var bunchaData = [UInt8](repeating: 0, count: Int(IMAGE_BYTES))
+				texture.getBytes(&bunchaData, bytesPerRow: ROW_BYTES, from: region, mipmapLevel: 0)
+				cubemap.replace(region: region, mipmapLevel: 0, slice: index, withBytes: bunchaData, bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
 			}
 			
 			return cubemap
