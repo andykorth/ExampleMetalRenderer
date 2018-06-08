@@ -54,6 +54,7 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	float4x4 mvpMatrix = uniforms.MVP_Matrix;
 	
 	float4 position = vertices.position;
+	float3 normal = uniforms.normal_Matrix * float3(vertices.normals);
 	
 	VertexOut out;
 	out.position = mvpMatrix * position;
@@ -61,12 +62,10 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	out.texCoords = vertices.texCoords;
 	out.occlusion = vertices.occlusion;
 	out.normals = vertices.normals;
-
-	float4 norm = (uniforms.normal_Matrix * float4(vertices.normals.xyz, 0));
-	out.eyeDir = norm.xyz;
+	out.eyeDir = normal;
 	
 	float3 incident = (uniforms.MV_Matrix * float4(position.xyz, 1)).xyz;
-	float3 surfaceNormal = normalize(norm.xyz);
+	float3 surfaceNormal = normalize(normal);
 
 	out.reflectDir = (uniforms.MV_i_Matrix * float4(reflect( incident, surfaceNormal ), 0) ).xyz;
 	return out;
