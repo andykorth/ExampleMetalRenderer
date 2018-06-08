@@ -135,7 +135,12 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	
 	func createPipelineState(vertex v : String, fragment frag : String, vertexDescriptor vertexDesc : MTLVertexDescriptor ) -> MTLRenderPipelineState {
 		let vertexFunction = default📚.makeFunction(name: v)
-		let fragmentFunction = default📚.makeFunction(name: frag)
+		var fragmentFunction = default📚.makeFunction(name: frag)
+		
+//		withUnsafePointer(to: &fragmentFunction) {
+//			print(" frag \(frag) value \(fragmentFunction) has address: \($0)")
+//		}
+	
 		
 		 // Configure a pipeline descriptor that is used to create a pipeline state
 		 let pipelineDesc = MTLRenderPipelineDescriptor()
@@ -167,13 +172,15 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let a = Int(UnicodeScalar("a").value)
 			let z = Int(UnicodeScalar("z").value)
 
-			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection"]
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection"]
 
 			if charVal >= a && charVal <= z {
 				
 				let index = charVal - a
-				print("Switch shader to: \(index)  -  \(arr[index])")
-				selectedShader = arr[index]
+				if(index < arr.count){
+					print("Switch shader to: \(index)  -  \(arr[index])")
+					selectedShader = arr[index]
+				}
 			}
 		}
 	}
