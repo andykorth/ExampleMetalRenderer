@@ -38,6 +38,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	let objMesh : ObjMesh
 	var cubemapTex : MTLTexture
 	var selectedShader = "fragPureReflection"
+	let uniformBuffer : MTLBuffer
 	
 	var vertexDesc : MTLVertexDescriptor
 	
@@ -122,6 +123,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		objMesh.addTexture(name: "moped_s", index: 1, forSubmesh: 10)
 		objMesh.addTexture(name: "moped_glow", index: 2, forSubmesh: 10)
 		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
+		
+		uniformBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [.storageModeShared])
 		
 		super.init()
 	}
@@ -212,9 +215,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			vector_float3(cols.2.x, cols.2.y, cols.2.z)
 		))
 
-		// fill uniform buffer:
-		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
-		
 		let t = CACurrentMediaTime()
 		
 		let s = sin (t / .pi);
@@ -244,11 +244,11 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			eyeDirection: eyeDir
 		)
 		
-		uniformsBuffer.contents().storeBytes(of: uniforms, toByteOffset: 0, as: Uniforms.self)
+		uniformBuffer.contents().storeBytes(of: uniforms, toByteOffset: 0, as: Uniforms.self)
 		
 		// Want to send this data to both vertex and fragment shaders.
-		renderCommands.setVertexBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
-		renderCommands.setFragmentBuffer(uniformsBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
+		renderCommands.setVertexBuffer(uniformBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
+		renderCommands.setFragmentBuffer(uniformBuffer, offset: 0, at: Int(BufferArgumentIndexUniforms.rawValue))
 	}
 
 	func draw(in view: MTKView) {
