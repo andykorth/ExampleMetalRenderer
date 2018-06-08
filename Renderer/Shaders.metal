@@ -19,11 +19,11 @@ struct VertexIn {
 
 struct VertexOut {
 	float4 position [[position]];
-	float4 normals;
+	float3 worldNormal;
 	float4 color;
 	float2 texCoords;
 	float occlusion;
-	float3 eyeDir;
+	float3 viewNormal;
 	float3 reflectDir;
 };
 
@@ -61,8 +61,8 @@ vertex VertexOut vertexShader(const VertexIn vertices [[stage_in]],
 	out.color = float4(1);
 	out.texCoords = vertices.texCoords;
 	out.occlusion = vertices.occlusion;
-	out.normals = vertices.normals;
-	out.eyeDir = normal;
+	out.worldNormal = vertices.normals.xyz;
+	out.viewNormal = normal;
 	
 	float3 incident = (uniforms.MV_Matrix * float4(position.xyz, 1)).xyz;
 	float3 surfaceNormal = normalize(normal);
@@ -84,14 +84,14 @@ fragment half4 fragUV(VertexOut fragments [[stage_in]] ) {
 fragment half4 fragVertexNormals(VertexOut fragments [[stage_in]],
 								 constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float3 n = fragments.normals.xyz;
+	float3 n = fragments.worldNormal.xyz;
 	return half4(n.x, n.y, n.z, 1);
 }
 
 fragment half4 fragEyeNormals(VertexOut fragments [[stage_in]],
 							  constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float3 n = normalize(fragments.eyeDir.xyz);
+	float3 n = normalize(fragments.viewNormal.xyz);
 	return half4(n.x, n.y, n.z, 1);
 }
 
@@ -130,7 +130,7 @@ fragment half4 fragDiffuseLighting(VertexOut fragments [[stage_in]],
 	uv.y = 1 - uv.y;
 	
 	float3 lightDir = uniforms.lightDirection.xyz;
-	float normalLightDot = dot(lightDir, fragments.normals.xyz);
+	float normalLightDot = dot(lightDir, fragments.worldNormal.xyz);
 	
 	float dot_product = max(normalLightDot, 0.0);
 	float4 diffuse = float4(dot_product, dot_product, dot_product, 1.0) * diffuseTex.sample(linearSampler, uv);
@@ -146,10 +146,10 @@ fragment half4 fragDiffuseAndSpecular(VertexOut fragments [[stage_in]],
 	uv.y = 1 - uv.y;
 	
 	// renormalize because interpolated normals can get a bit off
-	float3 normal = normalize(fragments.normals.xyz);
+	float3 normal = normalize(fragments.worldNormal.xyz);
 	
 	float3 lightDir = normalize(uniforms.lightDirection.xyz);
-	float normalLightDot = dot(lightDir, fragments.normals.xyz);
+	float normalLightDot = dot(lightDir, fragments.worldNormal.xyz);
 	
 	float dot_product = max(normalLightDot, 0.0) / 1.5 + 0.33; // add some ambient light
 	float4 diffuse = float4(dot_product, dot_product, dot_product, 1.0) * diffuseTex.sample(linearSampler, uv);
@@ -178,10 +178,10 @@ fragment half4 fragDiffuseSpecularReflection(VertexOut fragments [[stage_in]],
 	uv.y = 1 - uv.y;
 	
 	// renormalize because interpolated normals can get a bit off
-	float3 normal = normalize(fragments.normals.xyz);
+	float3 normal = normalize(fragments.worldNormal.xyz);
 	
 	float3 lightDir = normalize(uniforms.lightDirection.xyz);
-	float normalLightDot = dot(lightDir, fragments.normals.xyz);
+	float normalLightDot = dot(lightDir, fragments.worldNormal.xyz);
 	
 	float dot_product = max(normalLightDot, 0.0) / 1.5 + 0.33; // add some ambient light
 	float4 diffuse = float4(dot_product, dot_product, dot_product, 1.0) * diffuseTex.sample(linearSampler, uv);
