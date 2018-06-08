@@ -211,16 +211,13 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		let modelViewMatrix = matrix_multiply(viewMatrix, modelMatrix)
 		let modelViewProjectionMatrix = matrix_multiply(projMatrix, modelViewMatrix)
 
-		var normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
-		// normal matrix should be a 3x3, so we'll omit the translation.
-		normalMatrix[0, 3] = 0
-		normalMatrix[1, 3] = 0
-		normalMatrix[2, 3] = 0
-		normalMatrix[3, 3] = 0
-
-		normalMatrix[3, 0] = 0
-		normalMatrix[3, 1] = 0
-		normalMatrix[3, 2] = 0
+		let normalMatrix = matrix_transpose(matrix_invert(modelViewMatrix));
+		let cols = normalMatrix.columns
+		let normalMatrix3x3 = matrix_float3x3(columns:(
+			vector_float3(cols.0.x, cols.0.y, cols.0.z),
+			vector_float3(cols.1.x, cols.1.y, cols.1.z),
+			vector_float3(cols.2.x, cols.2.y, cols.2.z)
+		))
 
 		// fill uniform buffer:
 		let uniformsBuffer = device.makeBuffer(length: MemoryLayout<Uniforms>.size, options: [])
@@ -244,7 +241,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			MVP_i_Matrix: matrix_invert(modelViewProjectionMatrix),
 			MV_Matrix: modelViewMatrix,
 			MV_i_Matrix: matrix_invert(modelViewMatrix),
-			normal_Matrix: normalMatrix,
+			normal_Matrix: normalMatrix3x3,
 			lightDirection: lightDir,
 			timeUniform: vector_float4(Float(t), Float(t), Float(t), Float(t)),
 			sinTime: vector_float4(Float(sin(t)), Float(sin(t*2)), Float(sin(t*4)), Float(sin(t*8))),
