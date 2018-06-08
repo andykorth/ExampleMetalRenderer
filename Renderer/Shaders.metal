@@ -220,7 +220,7 @@ fragment half4 fragDiffuseImageLighting(VertexOut fragments [[stage_in]],
 	
 	float3 n = normalize(fragments.reflectDir);
 	// renormalize because interpolated normals can get a bit off
-	float3 normal = normalize(fragments.normals.xyz);
+	float3 normal = normalize(fragments.worldNormal.xyz);
 	
 	float4 light = cubemapDiffuse.sample(linearSampler, n);
 	float4 diffuse = light * diffuseTex.sample(linearSampler, uv);
