@@ -168,6 +168,44 @@ fragment half4 fragDiffuseAndSpecular(VertexOut fragments [[stage_in]],
 }
 
 
+
+fragment half4 fragDiffuseSpecularReflection(VertexOut fragments [[stage_in]],
+									  texture2d<float> diffuseTex [[texture(0)]],
+									  texture2d<float> specularTex [[texture(1)]],
+											 texturecube<float> cubemapSky [[texture(3)]],
+									  constant Uniforms &uniforms [[buffer(1)]] )
+{
+	float2 uv = fragments.texCoords;
+	uv.y = 1 - uv.y;
+	
+	// renormalize because interpolated normals can get a bit off
+	float3 normal = normalize(fragments.normals.xyz);
+	
+	float3 lightDir = normalize(uniforms.lightDirection.xyz);
+	float normalLightDot = dot(lightDir, fragments.normals.xyz);
+	
+	float dot_product = max(normalLightDot, 0.0) / 1.5 + 0.33; // add some ambient light
+	float4 diffuse = float4(dot_product, dot_product, dot_product, 1.0) * diffuseTex.sample(linearSampler, uv);
+	
+	float4 specularReflection = float4(0, 0, 0, 1);
+	
+	float4 specularColor =	specularTex.sample(linearSampler, uv);
+	
+	if(normalLightDot >= 0.0){ // make sure the light isn't on the wrong side
+		float attenuation = 2;
+		specularReflection = attenuation * specularColor.a * specularColor * pow(max(0.0, dot(reflect(-lightDir, normalize(normal)), normalize(uniforms.eyeDirection.xyz))), 10.0 );
+		specularReflection.a = 1.0;
+	}
+	
+	float3 n = normalize(fragments.reflectDir);
+	float4 reflection = cubemapSky.sample(linearSampler, n);
+
+	float4 color = 0.8 * diffuse + specularReflection + reflection * specularColor.a * 0.3;
+
+	return half4(color);
+}
+
+
 fragment half4 frag(VertexOut fragments [[stage_in]],
 							  texture2d<float> diffuseTex [[texture(0)]],
 							  texture2d<float> specularTex [[texture(1)]],
