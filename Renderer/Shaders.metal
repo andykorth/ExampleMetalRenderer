@@ -224,34 +224,51 @@ fragment half4 fragDiffuseImageLighting(VertexOut fragments [[stage_in]],
 	
 	float4 light = cubemapDiffuse.sample(linearSampler, n);
 	float4 diffuse = light * diffuseTex.sample(linearSampler, uv);
-
+	
 	return half4(diffuse);
 }
 
-
-fragment half4 frag(VertexOut fragments [[stage_in]],
-							  texture2d<float> diffuseTex [[texture(0)]],
-							  texture2d<float> specularTex [[texture(1)]],
-							  texture2d<float> glowTex [[texture(2)]]
-							  )
+fragment half4 fragMoreImageLighting(VertexOut fragments [[stage_in]],
+										texture2d<float> diffuseTex [[texture(0)]],
+										texture2d<float> specularTex [[texture(1)]],
+										texturecube<float> cubemapSky [[texture(3)]],
+										texturecube<float> cubemapSpec [[texture(4)]],
+										texturecube<float> cubemapDiffuse [[texture(5)]],
+										constant Uniforms &uniforms [[buffer(1)]] )
 {
-	float4 baseColor = fragments.color;
-	float4 occlusion = fragments.occlusion;
-	
 	float2 uv = fragments.texCoords;
 	uv.y = 1 - uv.y;
 	
-	float4 diffuse = diffuseTex.sample(linearSampler, uv);
-	float4 spec = specularTex.sample(linearSampler, uv);
-	float4 glow = glowTex.sample(linearSampler, uv);
-//	return half4(occlusion.r, occlusion.g, occlusion.b, 1); //half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
-	//return half4(baseColor.r, baseColor.g, baseColor.b, 1);
-	//return half4(baseColor * occlusion * texture);
-//	return half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
-	//return half4(glow.r, glow.g, glow.b, 1);
+	float3 n = normalize(fragments.reflectDir);
+	// renormalize because interpolated normals can get a bit off
+	float3 normal = normalize(fragments.worldNormal.xyz);
+	
+	float4 ambient = float4(0.2, 0.2, 0.2, 0);
+	float4 light = cubemapDiffuse.sample(linearSampler, n) + ambient;
+	float4 diffuse = light * diffuseTex.sample(linearSampler, uv);
+	
+	float3 lightDir = normalize(float3(-1, 2.5, +0.3) );
+	
+	float3 specularReflection = float3(0, 0, 0);
+	float4 specularColor = specularTex.sample(linearSampler, uv);
 
-	//return half4(spec.a, spec.a, spec.a, 1);
-	return half4(diffuse);// + half4(fragments.texCoords.x, fragments.texCoords.y, 0, 1);
+	float specularFactor = dot(reflect(-lightDir, normalize(normal)), normalize(uniforms.eyeDirection.xyz));
+	if(specularFactor > 0.0){ // make sure the light isn't on the wrong side
+		float attenuation = 2;
+		
+		specularFactor = pow(specularFactor, 10.0 );
+		specularReflection = attenuation * specularColor.a * specularFactor * specularColor.rgb;
+	}
+	
+	float4 reflection = cubemapSky.sample(linearSampler, n);
+	
+	float reflectivity = pow(specularColor.a, 3) * 0.5; //looks about right. asphalt, tires, seat shouldn't reflect much.
+	
+	float4 color = 0.9 * diffuse + float4(specularReflection, 1.0) + reflection * reflectivity;
+//	color = float4( dot(diffuse.xyz, float3(0.3, 0.5, 0.2)), dot(specularReflection.xyz, float3(0.3, 0.5, 0.2)), 0, 1 );
+//	color = specularReflection.rgbr;
+	
+	return half4(color);
 }
 
 

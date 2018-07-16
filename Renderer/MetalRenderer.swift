@@ -39,7 +39,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	var cubemapTex : MTLTexture
 	var cubemapDiffTex : MTLTexture
 	var cubemapSpecTex : MTLTexture
-	var selectedShader = "fragPureReflection"
+	var selectedShader = "fragMoreImageLighting"
 	let uniformBuffer : MTLBuffer
 	
 	var vertexDesc : MTLVertexDescriptor
@@ -137,6 +137,20 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		super.init()
 	}
 	
+	func reassignCubemaps(tex : String, specular : String, diffuse : String){
+		cubemapTex = MetalRenderer.loadCubemapTexture(device: device, name: tex)
+		cubemapDiffTex = MetalRenderer.loadCubemapTexture(device: device, name: diffuse)
+		cubemapSpecTex = MetalRenderer.loadCubemapTexture(device: device, name: specular)
+		
+		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 9)
+		objMesh.addCubemapTexture(cubemapSpecTex, index: 4, forSubmesh: 9)
+		objMesh.addCubemapTexture(cubemapDiffTex, index: 5, forSubmesh: 9)
+		
+		objMesh.addCubemapTexture(cubemapTex, index: 3, forSubmesh: 10)
+		objMesh.addCubemapTexture(cubemapSpecTex, index: 4, forSubmesh: 10)
+		objMesh.addCubemapTexture(cubemapDiffTex, index: 5, forSubmesh: 10)
+	}
+	
 	func createPipelineState(vertex v : String, fragment frag : String) -> MTLRenderPipelineState {
 		return createPipelineState(vertex: v, fragment: frag, vertexDescriptor: vertexDesc)
 	}
@@ -144,11 +158,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 	func createPipelineState(vertex v : String, fragment frag : String, vertexDescriptor vertexDesc : MTLVertexDescriptor ) -> MTLRenderPipelineState {
 		let vertexFunction = default📚.makeFunction(name: v)
 		var fragmentFunction = default📚.makeFunction(name: frag)
-		
-//		withUnsafePointer(to: &fragmentFunction) {
-//			print(" frag \(frag) value \(fragmentFunction) has address: \($0)")
-//		}
-	
 		
 		 // Configure a pipeline descriptor that is used to create a pipeline state
 		 let pipelineDesc = MTLRenderPipelineDescriptor()
@@ -180,7 +189,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			let a = Int(UnicodeScalar("a").value)
 			let z = Int(UnicodeScalar("z").value)
 
-			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection", "fragDiffuseImageLighting"]
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection", "fragDiffuseImageLighting", "fragMoreImageLighting"]
 
 			if charVal >= a && charVal <= z {
 				
@@ -190,6 +199,20 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 					selectedShader = arr[index]
 				}
 			}
+			if charVal == Int(UnicodeScalar("1").value) {
+				reassignCubemaps(tex: "bridge_4k", specular: "bridge_4k_fakeDiff", diffuse: "bridge_4k_fakeDiff")
+			}
+			if charVal == Int(UnicodeScalar("2").value) {
+				reassignCubemaps(tex: "CrappySunset_SKY", specular: "CrappySunset_SPEC", diffuse: "CrappySunset_DIFF")
+			}
+			if charVal == Int(UnicodeScalar("3").value) {
+				reassignCubemaps(tex: "austriaLDR_SKY", specular: "austriaLDR_SPEC", diffuse: "austriaLDR_DIFF")
+			}
+			if charVal == Int(UnicodeScalar("4").value) {
+				reassignCubemaps(tex: "miramar", specular: "miramar", diffuse: "miramar")
+			}
+
+			
 		}
 	}
 	
@@ -316,7 +339,7 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
 			}else{
 				// mirrors, headlights, etc.
-				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: "fragRed"))
+				renderCommands.setRenderPipelineState(createPipelineState(vertex: "vertexShader", fragment: selectedShader))
 			}
 
 			renderCommands.drawIndexedPrimitives(type: submesh.primitiveType, indexCount: submesh.indexCount, indexType: submesh.indexType, indexBuffer: submesh.indexBuffer.buffer, indexBufferOffset: submesh.indexBuffer.offset)
@@ -402,7 +425,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		do {
 			let cubemapDesc = MTLTextureDescriptor.textureCubeDescriptor(pixelFormat: MTLPixelFormat.bgra8Unorm, size: size, mipmapped: false)
 			let cubemap = device.makeTexture(descriptor: cubemapDesc)
-			
 			
 			let region : MTLRegion = MTLRegion(origin: MTLOrigin(x: 0, y: 0, z: 0),
 													size: MTLSize(width: size, height: size, depth: 1))
