@@ -83,10 +83,11 @@ class ObjMesh {
 			let data = try Data(contentsOf: URL(fileURLWithPath: file))
 			
 			let textureLoaderOptions: [String: NSObject]
-			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSString(string: "MTKTextureLoaderOptionSRGB"), MTKTextureLoaderOptionGenerateMipmaps : NSString(string: "GLKTextureLoaderGenerateMipmaps") ]
+			textureLoaderOptions = [MTKTextureLoaderOptionSRGB : NSNumber(value: false),
+									MTKTextureLoaderOptionGenerateMipmaps : NSNumber(value: true) ]
 			
-
 			let texture = try loader.newTexture(with: data, options: textureLoaderOptions )
+			
 			if textures[submesh] == nil{
 				textures[submesh] = [Int : MTLTexture]()
 			}

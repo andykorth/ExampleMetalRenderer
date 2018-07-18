@@ -386,7 +386,8 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 				
 				var bunchaData = [UInt8](repeating: 0, count: Int(IMAGE_BYTES))
 				texture.getBytes(&bunchaData, bytesPerRow: ROW_BYTES, from: region, mipmapLevel: 0)
-				cubemap.replace(region: region, mipmapLevel: 0, slice: index, withBytes: bunchaData, bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
+				cubemap.replace(region: region, mipmapLevel: 0, slice: index, withBytes: bunchaData,
+								bytesPerRow: bytesPP * size, bytesPerImage: bytesPP * size * size)
 			}
 			
 			return cubemap
