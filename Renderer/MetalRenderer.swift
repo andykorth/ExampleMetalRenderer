@@ -107,9 +107,9 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		attribs[1].format = .float3 // normal
 		attribs[2].offset = 12+12
 		attribs[2].format = .uchar4 // color
-		attribs[3].offset = 16+12
+		attribs[3].offset = 12+12+4
 		attribs[3].format = .half2 // texture
-		attribs[4].offset = 20+12
+		attribs[4].offset = 12+12+4+4;
 		attribs[4].format = .float // occlusion
 		vertexDesc.layouts[0].stride = 24+12
 		
@@ -180,52 +180,6 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 		}
 	}
 	
-	func keyDown(theEvent : NSEvent) {
-		print("Key down: \(theEvent.keyCode)")
-		
-		if let chars : String = theEvent.characters {
-			let charVal = Int(UnicodeScalar(chars)!.value)
-
-			let a = Int(UnicodeScalar("a").value)
-			let z = Int(UnicodeScalar("z").value)
-
-			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection", "fragDiffuseImageLighting", "fragMoreImageLighting"]
-
-			if charVal >= a && charVal <= z {
-				
-				let index = charVal - a
-				if(index < arr.count){
-					print("Switch shader to: \(index)  -  \(arr[index])")
-					selectedShader = arr[index]
-				}
-			}
-			if charVal == Int(UnicodeScalar("1").value) {
-				reassignCubemaps(tex: "bridge_4k", specular: "bridge_4k_fakeDiff", diffuse: "bridge_4k_fakeDiff")
-			}
-			if charVal == Int(UnicodeScalar("2").value) {
-				reassignCubemaps(tex: "CrappySunset_SKY", specular: "CrappySunset_SPEC", diffuse: "CrappySunset_DIFF")
-			}
-			if charVal == Int(UnicodeScalar("3").value) {
-				reassignCubemaps(tex: "austriaLDR_SKY", specular: "austriaLDR_SPEC", diffuse: "austriaLDR_DIFF")
-			}
-			if charVal == Int(UnicodeScalar("4").value) {
-				reassignCubemaps(tex: "miramar", specular: "miramar", diffuse: "miramar")
-			}
-
-			
-		}
-	}
-	
-	func mouseDragged(theEvent : NSEvent) {
-		mouseX(Double(theEvent.deltaX), mouseY: Double(theEvent.deltaY))
-	}
-	
-	func mouseX(_ dx : Double, mouseY dy : Double){
-		//print("mouse moved: \(dx), \(dy)")
-		scrollX = scrollX + dx * 0.004 // in radians
-		scrollY = scrollY + dy * 0.004
-	}
-	
 	func setupUniforms(renderCommands : MTLRenderCommandEncoder){
 		renderCommands.setViewport(viewport)
 		renderCommands.setDepthStencilState(depthStencilState)
@@ -255,18 +209,17 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 
 		let t = CACurrentMediaTime()
 		
+		// Animate the light direction.
 		let s = sin (t / .pi);
 		let c = cos (t / .pi);
-		//Vector3 v = new Vector3 (s, Math.Abs (c * 0.2f) + 0.1f, 0f);
-		var lightDir : vector_float4 = vector_float4(Float(s), 0.3, Float(c), 0);
-		lightDir = normalize(lightDir)
+		let lightDir : vector_float4 = normalize(vector_float4(Float(s), 0.3, Float(c), 0));
 		
-		var eyeDir = vector_float4( Float(cos(scrollX * Double.pi / 2.0) * sin(scrollY * Double.pi / 2.0)),
+		let eyeDir = normalize(vector_float4( Float(cos(scrollX * Double.pi / 2.0) * sin(scrollY * Double.pi / 2.0)),
 									Float(cos(scrollY * Double.pi / 2.0)),
 									Float(sin(scrollX * Double.pi / 2.0) * sin(-scrollY * Double.pi / 2.0)),
-									1) // * cameraPos.z;
-		eyeDir = normalize(eyeDir)
+									1))
 
+		// Assmble uniform data for buffer
 		let uniforms = Uniforms(
 			MVP_Matrix: modelViewProjectionMatrix,
 			MVP_i_Matrix: matrix_invert(modelViewProjectionMatrix),
@@ -441,4 +394,51 @@ class MetalRenderer: NSObject, MTKViewDelegate{
 			fatalError("\(error)")
 		}
 	}
+	
+	func keyDown(theEvent : NSEvent) {
+		print("Key down: \(theEvent.keyCode)")
+		
+		if let chars : String = theEvent.characters {
+			let charVal = Int(UnicodeScalar(chars)!.value)
+			
+			let a = Int(UnicodeScalar("a").value)
+			let z = Int(UnicodeScalar("z").value)
+			
+			let arr = ["fragRed", "fragUV", "fragDiffuse", "fragVertexNormals", "fragDiffuseLighting", "fragDiffuseAndSpecular", "fragEyeNormals", "fragEyeReflectionVector", "fragPureReflection", "fragDiffuseSpecularReflection", "fragDiffuseImageLighting", "fragMoreImageLighting"]
+			
+			if charVal >= a && charVal <= z {
+				
+				let index = charVal - a
+				if(index < arr.count){
+					print("Switch shader to: \(index)  -  \(arr[index])")
+					selectedShader = arr[index]
+				}
+			}
+			if charVal == Int(UnicodeScalar("1").value) {
+				reassignCubemaps(tex: "bridge_4k", specular: "bridge_4k_fakeDiff", diffuse: "bridge_4k_fakeDiff")
+			}
+			if charVal == Int(UnicodeScalar("2").value) {
+				reassignCubemaps(tex: "CrappySunset_SKY", specular: "CrappySunset_SPEC", diffuse: "CrappySunset_DIFF")
+			}
+			if charVal == Int(UnicodeScalar("3").value) {
+				reassignCubemaps(tex: "austriaLDR_SKY", specular: "austriaLDR_SPEC", diffuse: "austriaLDR_DIFF")
+			}
+			if charVal == Int(UnicodeScalar("4").value) {
+				reassignCubemaps(tex: "miramar", specular: "miramar", diffuse: "miramar")
+			}
+			
+			
+		}
+	}
+	
+	func mouseDragged(theEvent : NSEvent) {
+		mouseX(Double(theEvent.deltaX), mouseY: Double(theEvent.deltaY))
+	}
+	
+	func mouseX(_ dx : Double, mouseY dy : Double){
+		//print("mouse moved: \(dx), \(dy)")
+		scrollX = scrollX + dx * 0.004 // in radians
+		scrollY = scrollY + dy * 0.004
+	}
+	
 }
